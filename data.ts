@@ -1017,6 +1017,10 @@ export type TypeAlias = {
    */
   readonly name: ElmTypeName;
   /**
+   * 外部に公開するか
+   */
+  readonly export: Bool;
+  /**
    * コメント
    */
   readonly comment: String;
@@ -1051,6 +1055,10 @@ export type CustomType = {
    */
   readonly name: ElmTypeName;
   /**
+   * 外部に公開するレベル
+   */
+  readonly export: CustomTypeExportLevel;
+  /**
    * コメント
    */
   readonly comment: String;
@@ -1059,6 +1067,15 @@ export type CustomType = {
    */
   readonly variantList: List<Variant>;
 };
+
+/**
+ * カスタム型の公開レベル
+ * @typePartId b8a3bf90717822ff6e1c09e9975df087
+ */
+export type CustomTypeExportLevel =
+  | "NoExport"
+  | "ExportTypeOnly"
+  | "ExportTypeAndVariant";
 
 /**
  * バリアント. 値コンストラクタ. タグ
@@ -4896,6 +4913,7 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
     encode: (value: TypeAlias): ReadonlyArray<number> =>
       ElmTypeName.codec
         .encode(value.name)
+        .concat(Bool.codec.encode(value.export))
         .concat(String.codec.encode(value.comment))
         .concat(List.codec(Field.codec).encode(value.fieldList)),
     decode: (
@@ -4906,10 +4924,14 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
         readonly result: ElmTypeName;
         readonly nextIndex: number;
       } = ElmTypeName.codec.decode(index, binary);
+      const exportAndNextIndex: {
+        readonly result: Bool;
+        readonly nextIndex: number;
+      } = Bool.codec.decode(nameAndNextIndex.nextIndex, binary);
       const commentAndNextIndex: {
         readonly result: String;
         readonly nextIndex: number;
-      } = String.codec.decode(nameAndNextIndex.nextIndex, binary);
+      } = String.codec.decode(exportAndNextIndex.nextIndex, binary);
       const fieldListAndNextIndex: {
         readonly result: List<Field>;
         readonly nextIndex: number;
@@ -4917,6 +4939,7 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
       return {
         result: {
           name: nameAndNextIndex.result,
+          export: exportAndNextIndex.result,
           comment: commentAndNextIndex.result,
           fieldList: fieldListAndNextIndex.result,
         },
@@ -4966,6 +4989,7 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
     encode: (value: CustomType): ReadonlyArray<number> =>
       ElmTypeName.codec
         .encode(value.name)
+        .concat(CustomTypeExportLevel.codec.encode(value.export))
         .concat(String.codec.encode(value.comment))
         .concat(List.codec(Variant.codec).encode(value.variantList)),
     decode: (
@@ -4976,10 +5000,17 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
         readonly result: ElmTypeName;
         readonly nextIndex: number;
       } = ElmTypeName.codec.decode(index, binary);
+      const exportAndNextIndex: {
+        readonly result: CustomTypeExportLevel;
+        readonly nextIndex: number;
+      } = CustomTypeExportLevel.codec.decode(
+        nameAndNextIndex.nextIndex,
+        binary
+      );
       const commentAndNextIndex: {
         readonly result: String;
         readonly nextIndex: number;
-      } = String.codec.decode(nameAndNextIndex.nextIndex, binary);
+      } = String.codec.decode(exportAndNextIndex.nextIndex, binary);
       const variantListAndNextIndex: {
         readonly result: List<Variant>;
         readonly nextIndex: number;
@@ -4990,11 +5021,82 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
       return {
         result: {
           name: nameAndNextIndex.result,
+          export: exportAndNextIndex.result,
           comment: commentAndNextIndex.result,
           variantList: variantListAndNextIndex.result,
         },
         nextIndex: variantListAndNextIndex.nextIndex,
       };
+    },
+  },
+};
+
+/**
+ * カスタム型の公開レベル
+ * @typePartId b8a3bf90717822ff6e1c09e9975df087
+ */
+export const CustomTypeExportLevel: {
+  /**
+   * 公開しない
+   */
+  readonly NoExport: CustomTypeExportLevel;
+  /**
+   * 型の指定のみ公開. 外部のモジュールで値の構成とパターンマッチングの分岐がされることはない
+   */
+  readonly ExportTypeOnly: CustomTypeExportLevel;
+  /**
+   * 型とバリアントを公開する. 外部のモジュールで値の構成とパターンマッチングができる
+   */
+  readonly ExportTypeAndVariant: CustomTypeExportLevel;
+  readonly codec: Codec<CustomTypeExportLevel>;
+} = {
+  NoExport: "NoExport",
+  ExportTypeOnly: "ExportTypeOnly",
+  ExportTypeAndVariant: "ExportTypeAndVariant",
+  codec: {
+    encode: (value: CustomTypeExportLevel): ReadonlyArray<number> => {
+      switch (value) {
+        case "NoExport": {
+          return [0];
+        }
+        case "ExportTypeOnly": {
+          return [1];
+        }
+        case "ExportTypeAndVariant": {
+          return [2];
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): {
+      readonly result: CustomTypeExportLevel;
+      readonly nextIndex: number;
+    } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        return {
+          result: CustomTypeExportLevel.NoExport,
+          nextIndex: patternIndex.nextIndex,
+        };
+      }
+      if (patternIndex.result === 1) {
+        return {
+          result: CustomTypeExportLevel.ExportTypeOnly,
+          nextIndex: patternIndex.nextIndex,
+        };
+      }
+      if (patternIndex.result === 2) {
+        return {
+          result: CustomTypeExportLevel.ExportTypeAndVariant,
+          nextIndex: patternIndex.nextIndex,
+        };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
     },
   },
 };

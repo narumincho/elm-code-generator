@@ -15,9 +15,37 @@ export const codeToString = (elmCode: data.Code): string => {
   return (
     "module " +
     elmCode.moduleName +
+    "exposing(" +
+    elmCode.typeDeclarationList.map(typeDeclarationToExportName).join(", ") +
+    ")" +
     "\n\n" +
     elmCode.typeDeclarationList.map(typeDeclarationToString).join("\n\n")
   );
+};
+
+const typeDeclarationToExportName = (
+  typeDeclaration: data.TypeDeclaration
+): string => {
+  switch (typeDeclaration._) {
+    case "CustomType":
+      return customTypeToExportName(typeDeclaration.customType);
+    case "TypeAlias":
+      if (typeDeclaration.typeAlias.export) {
+        return typeDeclaration.typeAlias.name.string;
+      }
+      return "";
+  }
+};
+
+const customTypeToExportName = (customType: data.CustomType): string => {
+  switch (customType.export) {
+    case "NoExport":
+      return "";
+    case "ExportTypeOnly":
+      return customType.name.string;
+    case "ExportTypeAndVariant":
+      return customType.name.string + "(..)";
+  }
 };
 
 const typeDeclarationToString = (
@@ -103,6 +131,7 @@ switch (colorTypeName._) {
       typeDeclarationList: [
         data.TypeDeclaration.CustomType({
           name: colorTypeName.value,
+          export: data.CustomTypeExportLevel.ExportTypeAndVariant,
           comment: "色",
           variantList: [
             { name: "Red", parameter: [] },

@@ -16,6 +16,8 @@ export const Field = noParameterType(id.Field);
 
 export const CustomType = noParameterType(id.CustomType);
 
+export const CustomTypeExportLevel = noParameterType(id.CustomTypeExportLevel);
+
 export const Variant = noParameterType(id.Variant);
 
 export const ElmType = noParameterType(id.ElmType);

@@ -10,6 +10,8 @@ export const Field = "026a6d4ea3a1de5108e568323cd55491" as T;
 
 export const CustomType = "05d2cf07c140dc5397635b2fdbffa73b" as T;
 
+export const CustomTypeExportLevel = "b8a3bf90717822ff6e1c09e9975df087" as T;
+
 export const Variant = "3f46f8bc3d52776124f9d7087d6043de" as T;
 
 export const ElmType = "d77ebc32d63522c28c97693bb7c92029" as T;

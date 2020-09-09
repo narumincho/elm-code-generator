@@ -74,6 +74,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           type: type.ElmTypeName,
         },
         {
+          name: "export",
+          description: "外部に公開するか",
+          type: coreType.Bool,
+        },
+        {
           name: "comment",
           description: "コメント",
           type: coreType.String,
@@ -113,6 +118,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
       data.TypePartBody.Product([
         { name: "name", description: "カスタム型名", type: type.ElmTypeName },
         {
+          name: "export",
+          description: "外部に公開するレベル",
+          type: type.CustomTypeExportLevel,
+        },
+        {
           name: "comment",
           description: "コメント",
           type: coreType.String,
@@ -121,6 +131,32 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           name: "variantList",
           description: "バリアントのリスト. 値コンストラクタ. タグ",
           type: coreType.List(type.Variant),
+        },
+      ])
+    ),
+  ],
+  [
+    id.CustomTypeExportLevel,
+    t(
+      "CustomTypeExportLevel",
+      "カスタム型の公開レベル",
+      data.TypePartBody.Sum([
+        {
+          name: "NoExport",
+          description: "公開しない",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "ExportTypeOnly",
+          description:
+            "型の指定のみ公開. 外部のモジュールで値の構成とパターンマッチングの分岐がされることはない",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "ExportTypeAndVariant",
+          description:
+            "型とバリアントを公開する. 外部のモジュールで値の構成とパターンマッチングができる",
+          parameter: data.Maybe.Nothing(),
         },
       ])
     ),
