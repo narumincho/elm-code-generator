@@ -1015,7 +1015,7 @@ export type TypeAlias = {
   /**
    * 型エイリアス名
    */
-  readonly name: String;
+  readonly name: ElmTypeName;
   /**
    * コメント
    */
@@ -1049,7 +1049,7 @@ export type CustomType = {
   /**
    * カスタム型名
    */
-  readonly name: String;
+  readonly name: ElmTypeName;
   /**
    * コメント
    */
@@ -1079,7 +1079,86 @@ export type Variant = {
  * 型
  * @typePartId d77ebc32d63522c28c97693bb7c92029
  */
-export type ElmType = "Int";
+export type ElmType =
+  | { readonly _: "ImportedType"; readonly importedType: ImportedType }
+  | { readonly _: "LocalType"; readonly elmTypeName: ElmTypeName }
+  | { readonly _: "Function"; readonly functionType: FunctionType }
+  | { readonly _: "Tuple0" }
+  | { readonly _: "Tuple2"; readonly tuple2: Tuple2 }
+  | { readonly _: "Tuple3"; readonly tuple3: Tuple3 };
+
+/**
+ * Elmで使う型の名前. Elmで使える型名ということを確認済み
+ * @typePartId 198ee2d0f233e3fcc7638c360e522bfd
+ */
+export type ElmTypeName = {
+  readonly _: "ElmTypeName";
+  readonly string: String;
+};
+
+/**
+ * 外部のモジュールの型
+ * @typePartId c6b9d7ee91a4237a8babbf9eaf91fb67
+ */
+export type ImportedType = {
+  /**
+   * モジュール名
+   */
+  readonly moduleName: String;
+  /**
+   * 型名
+   */
+  readonly typeName: ElmTypeName;
+};
+
+/**
+ * 関数の型. 入力と出力
+ * @typePartId 06d1479f7c69ca39d8887709ab439633
+ */
+export type FunctionType = {
+  /**
+   * 入力の型
+   */
+  readonly input: ElmType;
+  /**
+   * 出力の型
+   */
+  readonly output: ElmType;
+};
+
+/**
+ * 2つの要素のタプルの型
+ * @typePartId 4622e3d9977a5fc8401827b1417e67eb
+ */
+export type Tuple2 = {
+  /**
+   * 左の型
+   */
+  readonly first: ElmType;
+  /**
+   * 右の型
+   */
+  readonly second: ElmType;
+};
+
+/**
+ * 3つの要素のタプルの型
+ * @typePartId d47c37ba40815c1ece2415fd7d8baa1d
+ */
+export type Tuple3 = {
+  /**
+   * 左の型
+   */
+  readonly first: ElmType;
+  /**
+   * 真ん中の型
+   */
+  readonly second: ElmType;
+  /**
+   * 右の型
+   */
+  readonly third: ElmType;
+};
 
 /**
  * -2 147 483 648 ～ 2 147 483 647. 32bit 符号付き整数. JavaScriptのnumberとして扱える. numberの32bit符号あり整数をSigned Leb128のバイナリに変換する
@@ -4815,7 +4894,7 @@ export const TypeDeclaration: {
 export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
   codec: {
     encode: (value: TypeAlias): ReadonlyArray<number> =>
-      String.codec
+      ElmTypeName.codec
         .encode(value.name)
         .concat(String.codec.encode(value.comment))
         .concat(List.codec(Field.codec).encode(value.fieldList)),
@@ -4824,9 +4903,9 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
       binary: Uint8Array
     ): { readonly result: TypeAlias; readonly nextIndex: number } => {
       const nameAndNextIndex: {
-        readonly result: String;
+        readonly result: ElmTypeName;
         readonly nextIndex: number;
-      } = String.codec.decode(index, binary);
+      } = ElmTypeName.codec.decode(index, binary);
       const commentAndNextIndex: {
         readonly result: String;
         readonly nextIndex: number;
@@ -4885,7 +4964,7 @@ export const Field: { readonly codec: Codec<Field> } = {
 export const CustomType: { readonly codec: Codec<CustomType> } = {
   codec: {
     encode: (value: CustomType): ReadonlyArray<number> =>
-      String.codec
+      ElmTypeName.codec
         .encode(value.name)
         .concat(String.codec.encode(value.comment))
         .concat(List.codec(Variant.codec).encode(value.variantList)),
@@ -4894,9 +4973,9 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
       binary: Uint8Array
     ): { readonly result: CustomType; readonly nextIndex: number } => {
       const nameAndNextIndex: {
-        readonly result: String;
+        readonly result: ElmTypeName;
         readonly nextIndex: number;
-      } = String.codec.decode(index, binary);
+      } = ElmTypeName.codec.decode(index, binary);
       const commentAndNextIndex: {
         readonly result: String;
         readonly nextIndex: number;
@@ -4959,17 +5038,66 @@ export const Variant: { readonly codec: Codec<Variant> } = {
  */
 export const ElmType: {
   /**
-   * -9007199254740991 ~ 9007199254740991 の範囲の整数
+   * インポートした型
    */
-  readonly Int: ElmType;
+  readonly ImportedType: (a: ImportedType) => ElmType;
+  /**
+   * モジュール内にある型
+   */
+  readonly LocalType: (a: ElmTypeName) => ElmType;
+  /**
+   * 関数
+   */
+  readonly Function: (a: FunctionType) => ElmType;
+  /**
+   * () 値を1つだけ持つ型. Unit
+   */
+  readonly Tuple0: ElmType;
+  /**
+   * (a, b)
+   */
+  readonly Tuple2: (a: Tuple2) => ElmType;
+  /**
+   * (a, b, c)
+   */
+  readonly Tuple3: (a: Tuple3) => ElmType;
   readonly codec: Codec<ElmType>;
 } = {
-  Int: "Int",
+  ImportedType: (importedType: ImportedType): ElmType => ({
+    _: "ImportedType",
+    importedType,
+  }),
+  LocalType: (elmTypeName: ElmTypeName): ElmType => ({
+    _: "LocalType",
+    elmTypeName,
+  }),
+  Function: (functionType: FunctionType): ElmType => ({
+    _: "Function",
+    functionType,
+  }),
+  Tuple0: { _: "Tuple0" },
+  Tuple2: (tuple2: Tuple2): ElmType => ({ _: "Tuple2", tuple2 }),
+  Tuple3: (tuple3: Tuple3): ElmType => ({ _: "Tuple3", tuple3 }),
   codec: {
     encode: (value: ElmType): ReadonlyArray<number> => {
-      switch (value) {
-        case "Int": {
-          return [0];
+      switch (value._) {
+        case "ImportedType": {
+          return [0].concat(ImportedType.codec.encode(value.importedType));
+        }
+        case "LocalType": {
+          return [1].concat(ElmTypeName.codec.encode(value.elmTypeName));
+        }
+        case "Function": {
+          return [2].concat(FunctionType.codec.encode(value.functionType));
+        }
+        case "Tuple0": {
+          return [3];
+        }
+        case "Tuple2": {
+          return [4].concat(Tuple2.codec.encode(value.tuple2));
+        }
+        case "Tuple3": {
+          return [5].concat(Tuple3.codec.encode(value.tuple3));
         }
       }
     },
@@ -4982,9 +5110,243 @@ export const ElmType: {
         readonly nextIndex: number;
       } = Int32.codec.decode(index, binary);
       if (patternIndex.result === 0) {
-        return { result: ElmType.Int, nextIndex: patternIndex.nextIndex };
+        const result: {
+          readonly result: ImportedType;
+          readonly nextIndex: number;
+        } = ImportedType.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.ImportedType(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 1) {
+        const result: {
+          readonly result: ElmTypeName;
+          readonly nextIndex: number;
+        } = ElmTypeName.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.LocalType(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 2) {
+        const result: {
+          readonly result: FunctionType;
+          readonly nextIndex: number;
+        } = FunctionType.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.Function(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 3) {
+        return { result: ElmType.Tuple0, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 4) {
+        const result: {
+          readonly result: Tuple2;
+          readonly nextIndex: number;
+        } = Tuple2.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.Tuple2(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 5) {
+        const result: {
+          readonly result: Tuple3;
+          readonly nextIndex: number;
+        } = Tuple3.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.Tuple3(result.result),
+          nextIndex: result.nextIndex,
+        };
       }
       throw new Error("存在しないパターンを指定された 型を更新してください");
+    },
+  },
+};
+
+/**
+ * Elmで使う型の名前. Elmで使える型名ということを確認済み
+ * @typePartId 198ee2d0f233e3fcc7638c360e522bfd
+ */
+export const ElmTypeName: {
+  /**
+   * **直接 ElmTypeName.ElmTypeName("Int") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**
+   */
+  readonly ElmTypeName: (a: String) => ElmTypeName;
+  readonly codec: Codec<ElmTypeName>;
+} = {
+  ElmTypeName: (string_: String): ElmTypeName => ({
+    _: "ElmTypeName",
+    string: string_,
+  }),
+  codec: {
+    encode: (value: ElmTypeName): ReadonlyArray<number> => {
+      switch (value._) {
+        case "ElmTypeName": {
+          return [0].concat(String.codec.encode(value.string));
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: ElmTypeName; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmTypeName.ElmTypeName(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
+    },
+  },
+};
+
+/**
+ * 外部のモジュールの型
+ * @typePartId c6b9d7ee91a4237a8babbf9eaf91fb67
+ */
+export const ImportedType: { readonly codec: Codec<ImportedType> } = {
+  codec: {
+    encode: (value: ImportedType): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.moduleName)
+        .concat(ElmTypeName.codec.encode(value.typeName)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: ImportedType; readonly nextIndex: number } => {
+      const moduleNameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const typeNameAndNextIndex: {
+        readonly result: ElmTypeName;
+        readonly nextIndex: number;
+      } = ElmTypeName.codec.decode(moduleNameAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          moduleName: moduleNameAndNextIndex.result,
+          typeName: typeNameAndNextIndex.result,
+        },
+        nextIndex: typeNameAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * 関数の型. 入力と出力
+ * @typePartId 06d1479f7c69ca39d8887709ab439633
+ */
+export const FunctionType: { readonly codec: Codec<FunctionType> } = {
+  codec: {
+    encode: (value: FunctionType): ReadonlyArray<number> =>
+      ElmType.codec
+        .encode(value.input)
+        .concat(ElmType.codec.encode(value.output)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: FunctionType; readonly nextIndex: number } => {
+      const inputAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(index, binary);
+      const outputAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(inputAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          input: inputAndNextIndex.result,
+          output: outputAndNextIndex.result,
+        },
+        nextIndex: outputAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * 2つの要素のタプルの型
+ * @typePartId 4622e3d9977a5fc8401827b1417e67eb
+ */
+export const Tuple2: { readonly codec: Codec<Tuple2> } = {
+  codec: {
+    encode: (value: Tuple2): ReadonlyArray<number> =>
+      ElmType.codec
+        .encode(value.first)
+        .concat(ElmType.codec.encode(value.second)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: Tuple2; readonly nextIndex: number } => {
+      const firstAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(index, binary);
+      const secondAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(firstAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          first: firstAndNextIndex.result,
+          second: secondAndNextIndex.result,
+        },
+        nextIndex: secondAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * 3つの要素のタプルの型
+ * @typePartId d47c37ba40815c1ece2415fd7d8baa1d
+ */
+export const Tuple3: { readonly codec: Codec<Tuple3> } = {
+  codec: {
+    encode: (value: Tuple3): ReadonlyArray<number> =>
+      ElmType.codec
+        .encode(value.first)
+        .concat(ElmType.codec.encode(value.second))
+        .concat(ElmType.codec.encode(value.third)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: Tuple3; readonly nextIndex: number } => {
+      const firstAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(index, binary);
+      const secondAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(firstAndNextIndex.nextIndex, binary);
+      const thirdAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(secondAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          first: firstAndNextIndex.result,
+          second: secondAndNextIndex.result,
+          third: thirdAndNextIndex.result,
+        },
+        nextIndex: thirdAndNextIndex.nextIndex,
+      };
     },
   },
 };

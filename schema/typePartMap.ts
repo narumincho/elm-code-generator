@@ -71,7 +71,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
         {
           name: "name",
           description: "型エイリアス名",
-          type: coreType.String,
+          type: type.ElmTypeName,
         },
         {
           name: "comment",
@@ -111,7 +111,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
       "CustomType",
       "カスタム型. 代数的データ型",
       data.TypePartBody.Product([
-        { name: "name", description: "カスタム型名", type: coreType.String },
+        { name: "name", description: "カスタム型名", type: type.ElmTypeName },
         {
           name: "comment",
           description: "コメント",
@@ -147,9 +147,129 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
       "型",
       data.TypePartBody.Sum([
         {
-          name: "Int",
-          description: "-9007199254740991 ~ 9007199254740991 の範囲の整数",
+          name: "ImportedType",
+          description: "インポートした型",
+          parameter: data.Maybe.Just(type.ImportedType),
+        },
+        {
+          name: "LocalType",
+          description: "モジュール内にある型",
+          parameter: data.Maybe.Just(type.ElmTypeName),
+        },
+        {
+          name: "Function",
+          description: "関数",
+          parameter: data.Maybe.Just(type.FunctionType),
+        },
+        {
+          name: "Tuple0",
+          description: "() 値を1つだけ持つ型. Unit",
           parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Tuple2",
+          description: "(a, b)",
+          parameter: data.Maybe.Just(type.Tuple2),
+        },
+        {
+          name: "Tuple3",
+          description: "(a, b, c)",
+          parameter: data.Maybe.Just(type.Tuple3),
+        },
+      ])
+    ),
+  ],
+  [
+    id.ElmTypeName,
+    t(
+      "ElmTypeName",
+      "Elmで使う型の名前. Elmで使える型名ということを確認済み",
+      data.TypePartBody.Sum([
+        {
+          name: "ElmTypeName",
+          description: `**直接 ElmTypeName.ElmTypeName("Int") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**`,
+          parameter: data.Maybe.Just(coreType.String),
+        },
+      ])
+    ),
+  ],
+  [
+    id.ImportedType,
+    t(
+      "ImportedType",
+      "外部のモジュールの型",
+      data.TypePartBody.Product([
+        {
+          name: "moduleName",
+          description: "モジュール名",
+          type: coreType.String,
+        },
+        {
+          name: "typeName",
+          description: "型名",
+          type: type.ElmTypeName,
+        },
+      ])
+    ),
+  ],
+  [
+    id.FunctionType,
+    t(
+      "FunctionType",
+      "関数の型. 入力と出力",
+      data.TypePartBody.Product([
+        {
+          name: "input",
+          description: "入力の型",
+          type: type.ElmType,
+        },
+        {
+          name: "output",
+          description: "出力の型",
+          type: type.ElmType,
+        },
+      ])
+    ),
+  ],
+  [
+    id.Tuple2,
+    t(
+      "Tuple2",
+      "2つの要素のタプルの型",
+      data.TypePartBody.Product([
+        {
+          name: "first",
+          description: "左の型",
+          type: type.ElmType,
+        },
+        {
+          name: "second",
+          description: "右の型",
+          type: type.ElmType,
+        },
+      ])
+    ),
+  ],
+  [
+    id.Tuple3,
+    t(
+      "Tuple3",
+      "3つの要素のタプルの型",
+      data.TypePartBody.Product([
+        {
+          name: "first",
+          description: "左の型",
+          type: type.ElmType,
+        },
+        {
+          name: "second",
+          description: "真ん中の型",
+          type: type.ElmType,
+        },
+        {
+          name: "third",
+          description: "右の型",
+          type: type.ElmType,
         },
       ])
     ),

@@ -19,3 +19,13 @@ export const CustomType = noParameterType(id.CustomType);
 export const Variant = noParameterType(id.Variant);
 
 export const ElmType = noParameterType(id.ElmType);
+
+export const ElmTypeName = noParameterType(id.ElmTypeName);
+
+export const ImportedType = noParameterType(id.ImportedType);
+
+export const FunctionType = noParameterType(id.FunctionType);
+
+export const Tuple2 = noParameterType(id.Tuple2);
+
+export const Tuple3 = noParameterType(id.Tuple3);
