@@ -996,7 +996,7 @@ export type Code = {
   /**
    * 型定義
    */
-  readonly typeDefinitionList: List<TypeDeclaration>;
+  readonly typeDeclarationList: List<TypeDeclaration>;
 };
 
 /**
@@ -4713,7 +4713,7 @@ export const Code: { readonly codec: Codec<Code> } = {
       String.codec
         .encode(value.moduleName)
         .concat(
-          List.codec(TypeDeclaration.codec).encode(value.typeDefinitionList)
+          List.codec(TypeDeclaration.codec).encode(value.typeDeclarationList)
         ),
     decode: (
       index: number,
@@ -4723,7 +4723,7 @@ export const Code: { readonly codec: Codec<Code> } = {
         readonly result: String;
         readonly nextIndex: number;
       } = String.codec.decode(index, binary);
-      const typeDefinitionListAndNextIndex: {
+      const typeDeclarationListAndNextIndex: {
         readonly result: List<TypeDeclaration>;
         readonly nextIndex: number;
       } = List.codec(TypeDeclaration.codec).decode(
@@ -4733,9 +4733,9 @@ export const Code: { readonly codec: Codec<Code> } = {
       return {
         result: {
           moduleName: moduleNameAndNextIndex.result,
-          typeDefinitionList: typeDefinitionListAndNextIndex.result,
+          typeDeclarationList: typeDeclarationListAndNextIndex.result,
         },
-        nextIndex: typeDefinitionListAndNextIndex.nextIndex,
+        nextIndex: typeDeclarationListAndNextIndex.nextIndex,
       };
     },
   },

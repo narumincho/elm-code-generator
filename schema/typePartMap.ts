@@ -36,7 +36,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           type: coreType.String,
         },
         {
-          name: "typeDefinitionList",
+          name: "typeDeclarationList",
           description: "型定義",
           type: coreType.List(type.TypeDeclaration),
         },
