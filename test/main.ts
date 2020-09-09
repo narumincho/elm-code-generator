@@ -46,7 +46,7 @@ describe("test", () => {
       moduleName: "Main",
       typeDeclarationList: [
         data.TypeDeclaration.TypeAlias({
-          name: data.ElmTypeName.ElmTypeName("User"),
+          name: main.elmTypeNameFromStringOrThrow("User"),
           export: false,
           comment: "色",
           fieldList: [
@@ -54,14 +54,14 @@ describe("test", () => {
               name: "name",
               type: data.ElmType.ImportedType({
                 moduleName: "String",
-                typeName: data.ElmTypeName.ElmTypeName("String"),
+                typeName: main.elmTypeNameFromStringOrThrow("String"),
               }),
             },
             {
               name: "age",
               type: data.ElmType.ImportedType({
                 moduleName: "Basics",
-                typeName: data.ElmTypeName.ElmTypeName("Int"),
+                typeName: main.elmTypeNameFromStringOrThrow("Int"),
               }),
             },
           ],

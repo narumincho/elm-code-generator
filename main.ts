@@ -11,6 +11,18 @@ export const elmTypeNameFromString = (
   return data.Maybe.Nothing();
 };
 
+export const elmTypeNameFromStringOrThrow = (
+  typeName: string
+): data.ElmTypeName => {
+  const result = elmTypeNameFromString(typeName);
+  switch (result._) {
+    case "Just":
+      return result.value;
+    case "Nothing":
+      throw new Error("invalid elm type name = " + typeName);
+  }
+};
+
 export const codeToString = (elmCode: data.Code): string => {
   return (
     "module " +
