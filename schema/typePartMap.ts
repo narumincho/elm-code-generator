@@ -66,7 +66,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
     id.TypeAlias,
     t(
       "TypeAlias",
-      "型エイリアス. レコード型に名前を付け, その名前の関数を作成する",
+      "型エイリアス. 型に名前を付け, レコード型の場合, その名前の関数を作成する",
       data.TypePartBody.Product([
         {
           name: "name",
@@ -84,9 +84,9 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           type: coreType.String,
         },
         {
-          name: "fieldList",
-          description: "フィードのリスト",
-          type: coreType.List(type.Field),
+          name: "type",
+          description: "別名を付ける型",
+          type: type.ElmType,
         },
       ])
     ),
@@ -239,6 +239,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           name: "Tuple3",
           description: "(a, b, c)",
           parameter: data.Maybe.Just(type.Tuple3),
+        },
+        {
+          name: "Record",
+          description: "{ name: String, age: Int } レコード型",
+          parameter: data.Maybe.Just(coreType.List(type.Field)),
         },
       ])
     ),

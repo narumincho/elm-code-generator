@@ -6,9 +6,7 @@ exports[`test output type alias 1`] = `
 "module Main exposing ()
 
 type alias User =
-    { name : String.String
-    , age : Basics.Int
-    }
+    { name : String.String, age : Basics.Int }
 "
 `;
 

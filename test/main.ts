@@ -58,7 +58,7 @@ describe("test", () => {
           name: main.elmTypeNameFromStringOrThrow("User"),
           export: false,
           comment: "色",
-          fieldList: [
+          type: data.ElmType.Record([
             {
               name: main.fieldNameFromStringOrThrow("name"),
               type: data.ElmType.ImportedType({
@@ -73,7 +73,7 @@ describe("test", () => {
                 typeName: main.elmTypeNameFromStringOrThrow("Int"),
               }),
             },
-          ],
+          ]),
         }),
       ],
     };
@@ -89,7 +89,7 @@ describe("test", () => {
             name: main.elmTypeNameFromStringOrThrow("IncludeInvalidFiledName"),
             export: false,
             comment: "",
-            fieldList: [
+            type: data.ElmType.Record([
               {
                 name: main.fieldNameFromStringOrThrow("then"),
                 type: data.ElmType.ImportedType({
@@ -97,7 +97,7 @@ describe("test", () => {
                   typeName: main.elmTypeNameFromStringOrThrow("String"),
                 }),
               },
-            ],
+            ]),
           }),
         ],
       };

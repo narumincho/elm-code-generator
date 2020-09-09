@@ -1008,7 +1008,7 @@ export type TypeDeclaration =
   | { readonly _: "CustomType"; readonly customType: CustomType };
 
 /**
- * 型エイリアス. レコード型に名前を付け, その名前の関数を作成する
+ * 型エイリアス. 型に名前を付け, レコード型の場合, その名前の関数を作成する
  * @typePartId c4f4063b78f55ec96b8eb82b71128d37
  */
 export type TypeAlias = {
@@ -1025,9 +1025,9 @@ export type TypeAlias = {
    */
   readonly comment: String;
   /**
-   * フィードのリスト
+   * 別名を付ける型
    */
-  readonly fieldList: List<Field>;
+  readonly type: ElmType;
 };
 
 /**
@@ -1117,7 +1117,8 @@ export type ElmType =
   | { readonly _: "Function"; readonly functionType: FunctionType }
   | { readonly _: "Tuple0" }
   | { readonly _: "Tuple2"; readonly tuple2: Tuple2 }
-  | { readonly _: "Tuple3"; readonly tuple3: Tuple3 };
+  | { readonly _: "Tuple3"; readonly tuple3: Tuple3 }
+  | { readonly _: "Record"; readonly fieldList: List<Field> };
 
 /**
  * Elmで使う型の名前. Elmで使える型名ということを確認済み
@@ -4920,7 +4921,7 @@ export const TypeDeclaration: {
 };
 
 /**
- * 型エイリアス. レコード型に名前を付け, その名前の関数を作成する
+ * 型エイリアス. 型に名前を付け, レコード型の場合, その名前の関数を作成する
  * @typePartId c4f4063b78f55ec96b8eb82b71128d37
  */
 export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
@@ -4930,7 +4931,7 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
         .encode(value.name)
         .concat(Bool.codec.encode(value.export))
         .concat(String.codec.encode(value.comment))
-        .concat(List.codec(Field.codec).encode(value.fieldList)),
+        .concat(ElmType.codec.encode(value.type)),
     decode: (
       index: number,
       binary: Uint8Array
@@ -4947,18 +4948,18 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
         readonly result: String;
         readonly nextIndex: number;
       } = String.codec.decode(exportAndNextIndex.nextIndex, binary);
-      const fieldListAndNextIndex: {
-        readonly result: List<Field>;
+      const typeAndNextIndex: {
+        readonly result: ElmType;
         readonly nextIndex: number;
-      } = List.codec(Field.codec).decode(commentAndNextIndex.nextIndex, binary);
+      } = ElmType.codec.decode(commentAndNextIndex.nextIndex, binary);
       return {
         result: {
           name: nameAndNextIndex.result,
           export: exportAndNextIndex.result,
           comment: commentAndNextIndex.result,
-          fieldList: fieldListAndNextIndex.result,
+          type: typeAndNextIndex.result,
         },
-        nextIndex: fieldListAndNextIndex.nextIndex,
+        nextIndex: typeAndNextIndex.nextIndex,
       };
     },
   },
@@ -5272,6 +5273,10 @@ export const ElmType: {
    * (a, b, c)
    */
   readonly Tuple3: (a: Tuple3) => ElmType;
+  /**
+   * { name: String, age: Int } レコード型
+   */
+  readonly Record: (a: List<Field>) => ElmType;
   readonly codec: Codec<ElmType>;
 } = {
   ImportedType: (importedType: ImportedType): ElmType => ({
@@ -5289,6 +5294,7 @@ export const ElmType: {
   Tuple0: { _: "Tuple0" },
   Tuple2: (tuple2: Tuple2): ElmType => ({ _: "Tuple2", tuple2 }),
   Tuple3: (tuple3: Tuple3): ElmType => ({ _: "Tuple3", tuple3 }),
+  Record: (fieldList: List<Field>): ElmType => ({ _: "Record", fieldList }),
   codec: {
     encode: (value: ElmType): ReadonlyArray<number> => {
       switch (value._) {
@@ -5309,6 +5315,9 @@ export const ElmType: {
         }
         case "Tuple3": {
           return [5].concat(Tuple3.codec.encode(value.tuple3));
+        }
+        case "Record": {
+          return [6].concat(List.codec(Field.codec).encode(value.fieldList));
         }
       }
     },
@@ -5370,6 +5379,16 @@ export const ElmType: {
         } = Tuple3.codec.decode(patternIndex.nextIndex, binary);
         return {
           result: ElmType.Tuple3(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 6) {
+        const result: {
+          readonly result: List<Field>;
+          readonly nextIndex: number;
+        } = List.codec(Field.codec).decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.Record(result.result),
           nextIndex: result.nextIndex,
         };
       }

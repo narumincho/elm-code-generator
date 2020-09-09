@@ -1,4 +1,5 @@
 import * as data from "./data";
+import { strict } from "assert";
 
 const reservedWord = new Set([
   "if",
@@ -146,11 +147,7 @@ const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   typeAlias.name.string +
   " =\n" +
   indent +
-  "{ " +
-  typeAlias.fieldList.map(fieldToString).join("\n" + indent + ", ") +
-  "\n" +
-  indent +
-  "}";
+  elmTypeToString(typeAlias.type);
 
 const fieldToString = (field: data.Field): string =>
   field.name.string + " : " + elmTypeToString(field.type);
@@ -206,6 +203,12 @@ const elmTypeToString = (elmType: data.ElmType): string => {
         ", " +
         elmTypeToString(elmType.tuple3.third) +
         ")"
+      );
+    case "Record":
+      return (
+        "{ " +
+        elmType.fieldList.map((e): string => fieldToString(e)).join(", ") +
+        " }"
       );
   }
 };
