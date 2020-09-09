@@ -135,7 +135,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
         {
           name: "parameter",
           description: "パラメーター",
-          type: coreType.List(type.TypeAlias),
+          type: coreType.List(type.ElmType),
         },
       ])
     ),

@@ -1072,7 +1072,7 @@ export type Variant = {
   /**
    * パラメーター
    */
-  readonly parameter: List<TypeAlias>;
+  readonly parameter: List<ElmType>;
 };
 
 /**
@@ -4929,7 +4929,7 @@ export const Variant: { readonly codec: Codec<Variant> } = {
     encode: (value: Variant): ReadonlyArray<number> =>
       String.codec
         .encode(value.name)
-        .concat(List.codec(TypeAlias.codec).encode(value.parameter)),
+        .concat(List.codec(ElmType.codec).encode(value.parameter)),
     decode: (
       index: number,
       binary: Uint8Array
@@ -4939,12 +4939,9 @@ export const Variant: { readonly codec: Codec<Variant> } = {
         readonly nextIndex: number;
       } = String.codec.decode(index, binary);
       const parameterAndNextIndex: {
-        readonly result: List<TypeAlias>;
+        readonly result: List<ElmType>;
         readonly nextIndex: number;
-      } = List.codec(TypeAlias.codec).decode(
-        nameAndNextIndex.nextIndex,
-        binary
-      );
+      } = List.codec(ElmType.codec).decode(nameAndNextIndex.nextIndex, binary);
       return {
         result: {
           name: nameAndNextIndex.result,
