@@ -33,11 +33,41 @@ describe("test", () => {
             }),
           ],
         };
-        expect(main.codeToString(sampleElmCode)).toMatch(/Red/u);
+        expect(main.codeToString(sampleElmCode)).toMatchSnapshot();
         return;
       }
       case "Nothing":
         fail();
     }
+  });
+
+  it("output type alias", () => {
+    const sampleElmCode: data.Code = {
+      moduleName: "Main",
+      typeDeclarationList: [
+        data.TypeDeclaration.TypeAlias({
+          name: data.ElmTypeName.ElmTypeName("User"),
+          export: false,
+          comment: "色",
+          fieldList: [
+            {
+              name: "name",
+              type: data.ElmType.ImportedType({
+                moduleName: "String",
+                typeName: data.ElmTypeName.ElmTypeName("String"),
+              }),
+            },
+            {
+              name: "age",
+              type: data.ElmType.ImportedType({
+                moduleName: "Basics",
+                typeName: data.ElmTypeName.ElmTypeName("Int"),
+              }),
+            },
+          ],
+        }),
+      ],
+    };
+    expect(main.codeToString(sampleElmCode)).toMatchSnapshot();
   });
 });

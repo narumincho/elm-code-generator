@@ -15,11 +15,12 @@ export const codeToString = (elmCode: data.Code): string => {
   return (
     "module " +
     elmCode.moduleName +
-    "exposing(" +
+    " exposing (" +
     elmCode.typeDeclarationList.map(typeDeclarationToExportName).join(", ") +
     ")" +
     "\n\n" +
-    elmCode.typeDeclarationList.map(typeDeclarationToString).join("\n\n")
+    elmCode.typeDeclarationList.map(typeDeclarationToString).join("\n\n") +
+    "\n"
   );
 };
 
@@ -62,14 +63,16 @@ const typeDeclarationToString = (
 const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   "type alias " +
   typeAlias.name.string +
-  "=\n" +
+  " =\n" +
   indent +
   "{ " +
-  typeAlias.fieldList.map(fieldToString).join("\n" + indent + ",") +
-  "\n  }";
+  typeAlias.fieldList.map(fieldToString).join("\n" + indent + ", ") +
+  "\n" +
+  indent +
+  "}";
 
 const fieldToString = (field: data.Field): string =>
-  field.name + ": " + elmTypeToString(field.type);
+  field.name + " : " + elmTypeToString(field.type);
 
 const customTypeToString = (customType: data.CustomType): string =>
   "type " +
@@ -80,7 +83,10 @@ const customTypeToString = (customType: data.CustomType): string =>
   customType.variantList.map(variantToString).join("\n" + indent + "| ");
 
 const variantToString = (variant: data.Variant): string =>
-  variant.name + " " + variant.parameter.map(elmTypeToString).join(" ");
+  variant.name +
+  (variant.parameter.length === 0
+    ? ""
+    : " " + variant.parameter.map(elmTypeToString).join(" "));
 
 const elmTypeToString = (elmType: data.ElmType): string => {
   switch (elmType._) {
