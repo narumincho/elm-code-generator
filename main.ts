@@ -1,5 +1,7 @@
 import * as data from "./data";
 
+const indent = "    ";
+
 export const elmTypeNameFromString = (
   typeName: string
 ): data.Maybe<data.ElmTypeName> => {
@@ -9,7 +11,7 @@ export const elmTypeNameFromString = (
   return data.Maybe.Nothing();
 };
 
-const codeToString = (elmCode: data.Code): string => {
+export const codeToString = (elmCode: data.Code): string => {
   return (
     "module " +
     elmCode.moduleName +
@@ -32,9 +34,10 @@ const typeDeclarationToString = (
 const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   "type alias " +
   typeAlias.name.string +
-  "=" +
+  "=\n" +
+  indent +
   "{ " +
-  typeAlias.fieldList.map(fieldToString).join("\n  ,") +
+  typeAlias.fieldList.map(fieldToString).join("\n" + indent + ",") +
   "\n  }";
 
 const fieldToString = (field: data.Field): string =>
@@ -43,8 +46,10 @@ const fieldToString = (field: data.Field): string =>
 const customTypeToString = (customType: data.CustomType): string =>
   "type " +
   customType.name.string +
-  "\n  = " +
-  customType.variantList.map(variantToString).join("\n  | ");
+  "\n" +
+  indent +
+  "= " +
+  customType.variantList.map(variantToString).join("\n" + indent + "| ");
 
 const variantToString = (variant: data.Variant): string =>
   variant.name + " " + variant.parameter.map(elmTypeToString).join(" ");
