@@ -26,9 +26,18 @@ describe("test", () => {
               export: data.CustomTypeExportLevel.ExportTypeAndVariant,
               comment: "色",
               variantList: [
-                { name: "Red", parameter: [] },
-                { name: "Green", parameter: [] },
-                { name: "Blue", parameter: [] },
+                {
+                  name: main.variantNameFormStringOrThrow("Red"),
+                  parameter: [],
+                },
+                {
+                  name: main.variantNameFormStringOrThrow("Green"),
+                  parameter: [],
+                },
+                {
+                  name: main.variantNameFormStringOrThrow("Blue"),
+                  parameter: [],
+                },
               ],
             }),
           ],
@@ -51,14 +60,14 @@ describe("test", () => {
           comment: "色",
           fieldList: [
             {
-              name: "name",
+              name: main.fieldNameFromStringOrThrow("name"),
               type: data.ElmType.ImportedType({
                 moduleName: "String",
                 typeName: main.elmTypeNameFromStringOrThrow("String"),
               }),
             },
             {
-              name: "age",
+              name: main.fieldNameFromStringOrThrow("age"),
               type: data.ElmType.ImportedType({
                 moduleName: "Basics",
                 typeName: main.elmTypeNameFromStringOrThrow("Int"),
@@ -69,5 +78,31 @@ describe("test", () => {
       ],
     };
     expect(main.codeToString(sampleElmCode)).toMatchSnapshot();
+  });
+
+  it("invalid filed name", () => {
+    expect(() => {
+      const sampleElmCode: data.Code = {
+        moduleName: "Main",
+        typeDeclarationList: [
+          data.TypeDeclaration.TypeAlias({
+            name: main.elmTypeNameFromStringOrThrow("IncludeInvalidFiledName"),
+            export: false,
+            comment: "",
+            fieldList: [
+              {
+                name: main.fieldNameFromStringOrThrow("then"),
+                type: data.ElmType.ImportedType({
+                  moduleName: "String",
+                  typeName: main.elmTypeNameFromStringOrThrow("String"),
+                }),
+              },
+            ],
+          }),
+        ],
+      };
+
+      main.codeToString(sampleElmCode);
+    }).toThrowErrorMatchingSnapshot();
   });
 });

@@ -100,12 +100,26 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
         {
           name: "name",
           description: "フィールド名",
-          type: coreType.String,
+          type: type.FieldName,
         },
         {
           name: "type",
           description: "型",
           type: type.ElmType,
+        },
+      ])
+    ),
+  ],
+  [
+    id.FieldName,
+    t(
+      "FieldName",
+      "フィールド名",
+      data.TypePartBody.Sum([
+        {
+          name: "FieldName",
+          description: `**直接 FieldName.FieldName("name") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**`,
+          parameter: data.Maybe.Just(coreType.String),
         },
       ])
     ),
@@ -167,11 +181,25 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
       "Variant",
       "バリアント. 値コンストラクタ. タグ",
       data.TypePartBody.Product([
-        { name: "name", description: "バリアント名", type: coreType.String },
+        { name: "name", description: "バリアント名", type: type.VariantName },
         {
           name: "parameter",
           description: "パラメーター",
           type: coreType.List(type.ElmType),
+        },
+      ])
+    ),
+  ],
+  [
+    id.VariantName,
+    t(
+      "VariantName",
+      "バリアント名",
+      data.TypePartBody.Sum([
+        {
+          name: "VariantName",
+          description: `**直接 VariantName.VariantName("Loading") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**`,
+          parameter: data.Maybe.Just(coreType.String),
         },
       ])
     ),

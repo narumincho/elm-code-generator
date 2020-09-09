@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`test invalid filed name 1`] = `"invalid field name = then"`;
+
 exports[`test output type alias 1`] = `
 "module Main exposing ()
 

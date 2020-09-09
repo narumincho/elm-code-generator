@@ -1,16 +1,85 @@
 import * as data from "./data";
 
+const reservedWord = new Set([
+  "if",
+  "then",
+  "else",
+  "case",
+  "of",
+  "let",
+  "in",
+  "type",
+  "module",
+  "where",
+  "import",
+  "port",
+  "exposing",
+  "as",
+  "alias",
+]);
+
 const indent = "    ";
+
+export const fieldNameFromString = (
+  fieldName: string
+): data.Maybe<data.FieldName> => {
+  if (/^[a-z][a-zA-Z0-9_]*/u.test(fieldName) && !reservedWord.has(fieldName)) {
+    return data.Maybe.Just(data.FieldName.FieldName(fieldName));
+  }
+  return data.Maybe.Nothing();
+};
+
+export const fieldNameFromStringOrThrow = (
+  fieldName: string
+): data.FieldName => {
+  const result = fieldNameFromString(fieldName);
+  switch (result._) {
+    case "Just":
+      return result.value;
+    case "Nothing":
+      throw new Error("invalid field name = " + fieldName);
+  }
+};
+
+export const variantNameFormString = (
+  variantName: string
+): data.Maybe<data.VariantName> => {
+  if (
+    /^[A-Z][a-zA-Z0-9_]*/u.test(variantName) &&
+    !reservedWord.has(variantName)
+  ) {
+    return data.Maybe.Just(data.VariantName.VariantName(variantName));
+  }
+  return data.Maybe.Nothing();
+};
+
+/**
+ * @throws バリアント名にできない名前だった場合
+ */
+export const variantNameFormStringOrThrow = (
+  variantName: string
+): data.VariantName => {
+  const result = variantNameFormString(variantName);
+  switch (result._) {
+    case "Just":
+      return result.value;
+    case "Nothing":
+      throw new Error("invalid variant name = " + variantName);
+  }
+};
 
 export const elmTypeNameFromString = (
   typeName: string
 ): data.Maybe<data.ElmTypeName> => {
-  if (/^[A-Z][a-zA-Z0-9]*$/u.test(typeName)) {
+  if (/^[A-Z][a-zA-Z0-9_]*$/u.test(typeName) && !reservedWord.has(typeName)) {
     return data.Maybe.Just(data.ElmTypeName.ElmTypeName(typeName));
   }
   return data.Maybe.Nothing();
 };
 
+/**
+ * @throws 型名にできない名前だった場合
+ */
 export const elmTypeNameFromStringOrThrow = (
   typeName: string
 ): data.ElmTypeName => {
@@ -84,7 +153,7 @@ const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   "}";
 
 const fieldToString = (field: data.Field): string =>
-  field.name + " : " + elmTypeToString(field.type);
+  field.name.string + " : " + elmTypeToString(field.type);
 
 const customTypeToString = (customType: data.CustomType): string =>
   "type " +
@@ -95,7 +164,7 @@ const customTypeToString = (customType: data.CustomType): string =>
   customType.variantList.map(variantToString).join("\n" + indent + "| ");
 
 const variantToString = (variant: data.Variant): string =>
-  variant.name +
+  variant.name.string +
   (variant.parameter.length === 0
     ? ""
     : " " + variant.parameter.map(elmTypeToString).join(" "));

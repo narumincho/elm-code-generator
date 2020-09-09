@@ -1038,12 +1038,18 @@ export type Field = {
   /**
    * フィールド名
    */
-  readonly name: String;
+  readonly name: FieldName;
   /**
    * 型
    */
   readonly type: ElmType;
 };
+
+/**
+ * フィールド名
+ * @typePartId 3a0d2954450afcca061241bb421c3d0f
+ */
+export type FieldName = { readonly _: "FieldName"; readonly string: String };
 
 /**
  * カスタム型. 代数的データ型
@@ -1085,11 +1091,20 @@ export type Variant = {
   /**
    * バリアント名
    */
-  readonly name: String;
+  readonly name: VariantName;
   /**
    * パラメーター
    */
   readonly parameter: List<ElmType>;
+};
+
+/**
+ * バリアント名
+ * @typePartId 5fb0037d591eaaf94d92744acbbbb170
+ */
+export type VariantName = {
+  readonly _: "VariantName";
+  readonly string: String;
 };
 
 /**
@@ -4956,15 +4971,17 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
 export const Field: { readonly codec: Codec<Field> } = {
   codec: {
     encode: (value: Field): ReadonlyArray<number> =>
-      String.codec.encode(value.name).concat(ElmType.codec.encode(value.type)),
+      FieldName.codec
+        .encode(value.name)
+        .concat(ElmType.codec.encode(value.type)),
     decode: (
       index: number,
       binary: Uint8Array
     ): { readonly result: Field; readonly nextIndex: number } => {
       const nameAndNextIndex: {
-        readonly result: String;
+        readonly result: FieldName;
         readonly nextIndex: number;
-      } = String.codec.decode(index, binary);
+      } = FieldName.codec.decode(index, binary);
       const typeAndNextIndex: {
         readonly result: ElmType;
         readonly nextIndex: number;
@@ -4976,6 +4993,52 @@ export const Field: { readonly codec: Codec<Field> } = {
         },
         nextIndex: typeAndNextIndex.nextIndex,
       };
+    },
+  },
+};
+
+/**
+ * フィールド名
+ * @typePartId 3a0d2954450afcca061241bb421c3d0f
+ */
+export const FieldName: {
+  /**
+   * **直接 FieldName.FieldName("name") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**
+   */
+  readonly FieldName: (a: String) => FieldName;
+  readonly codec: Codec<FieldName>;
+} = {
+  FieldName: (string_: String): FieldName => ({
+    _: "FieldName",
+    string: string_,
+  }),
+  codec: {
+    encode: (value: FieldName): ReadonlyArray<number> => {
+      switch (value._) {
+        case "FieldName": {
+          return [0].concat(String.codec.encode(value.string));
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: FieldName; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: FieldName.FieldName(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
     },
   },
 };
@@ -5108,7 +5171,7 @@ export const CustomTypeExportLevel: {
 export const Variant: { readonly codec: Codec<Variant> } = {
   codec: {
     encode: (value: Variant): ReadonlyArray<number> =>
-      String.codec
+      VariantName.codec
         .encode(value.name)
         .concat(List.codec(ElmType.codec).encode(value.parameter)),
     decode: (
@@ -5116,9 +5179,9 @@ export const Variant: { readonly codec: Codec<Variant> } = {
       binary: Uint8Array
     ): { readonly result: Variant; readonly nextIndex: number } => {
       const nameAndNextIndex: {
-        readonly result: String;
+        readonly result: VariantName;
         readonly nextIndex: number;
-      } = String.codec.decode(index, binary);
+      } = VariantName.codec.decode(index, binary);
       const parameterAndNextIndex: {
         readonly result: List<ElmType>;
         readonly nextIndex: number;
@@ -5130,6 +5193,52 @@ export const Variant: { readonly codec: Codec<Variant> } = {
         },
         nextIndex: parameterAndNextIndex.nextIndex,
       };
+    },
+  },
+};
+
+/**
+ * バリアント名
+ * @typePartId 5fb0037d591eaaf94d92744acbbbb170
+ */
+export const VariantName: {
+  /**
+   * **直接 VariantName.VariantName("Loading") と指定してはいけない!! Elmの識別子として使える文字としてチェックできないため**
+   */
+  readonly VariantName: (a: String) => VariantName;
+  readonly codec: Codec<VariantName>;
+} = {
+  VariantName: (string_: String): VariantName => ({
+    _: "VariantName",
+    string: string_,
+  }),
+  codec: {
+    encode: (value: VariantName): ReadonlyArray<number> => {
+      switch (value._) {
+        case "VariantName": {
+          return [0].concat(String.codec.encode(value.string));
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: VariantName; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: VariantName.VariantName(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
     },
   },
 };

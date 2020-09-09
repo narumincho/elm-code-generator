@@ -14,11 +14,15 @@ export const TypeAlias = noParameterType(id.TypeAlias);
 
 export const Field = noParameterType(id.Field);
 
+export const FieldName = noParameterType(id.FieldName);
+
 export const CustomType = noParameterType(id.CustomType);
 
 export const CustomTypeExportLevel = noParameterType(id.CustomTypeExportLevel);
 
 export const Variant = noParameterType(id.Variant);
+
+export const VariantName = noParameterType(id.VariantName);
 
 export const ElmType = noParameterType(id.ElmType);
 
