@@ -6,4 +6,16 @@ const noParameterType = (typePartId: data.TypePartId): data.Type => ({
   parameter: [],
 });
 
-export const ElmCode = noParameterType(id.ElmCode);
+export const Code = noParameterType(id.Code);
+
+export const TypeDeclaration = noParameterType(id.TypeDeclaration);
+
+export const TypeAlias = noParameterType(id.TypeAlias);
+
+export const Field = noParameterType(id.Field);
+
+export const CustomType = noParameterType(id.CustomType);
+
+export const Variant = noParameterType(id.Variant);
+
+export const ElmType = noParameterType(id.ElmType);

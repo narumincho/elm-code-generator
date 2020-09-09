@@ -988,12 +988,98 @@ export type StaticResourceState<data extends unknown> =
  * Elmのコードを表現するもの
  * @typePartId 4caca9da175a9b7a74f40db96b119aec
  */
-export type ElmCode = {
+export type Code = {
   /**
    * モジュール名
    */
   readonly moduleName: String;
+  /**
+   * 型定義
+   */
+  readonly typeDefinitionList: List<TypeDeclaration>;
 };
+
+/**
+ * Elmの型定義
+ * @typePartId f54affde1e82f22eb1e69b81376458ec
+ */
+export type TypeDeclaration =
+  | { readonly _: "TypeAlias"; readonly typeAlias: TypeAlias }
+  | { readonly _: "CustomType"; readonly customType: CustomType };
+
+/**
+ * 型エイリアス. レコード型に名前を付け, その名前の関数を作成する
+ * @typePartId c4f4063b78f55ec96b8eb82b71128d37
+ */
+export type TypeAlias = {
+  /**
+   * 型エイリアス名
+   */
+  readonly name: String;
+  /**
+   * コメント
+   */
+  readonly comment: String;
+  /**
+   * フィードのリスト
+   */
+  readonly fieldList: List<Field>;
+};
+
+/**
+ * フィールド
+ * @typePartId 026a6d4ea3a1de5108e568323cd55491
+ */
+export type Field = {
+  /**
+   * フィールド名
+   */
+  readonly name: String;
+  /**
+   * 型
+   */
+  readonly type: ElmType;
+};
+
+/**
+ * カスタム型. 代数的データ型
+ * @typePartId 05d2cf07c140dc5397635b2fdbffa73b
+ */
+export type CustomType = {
+  /**
+   * カスタム型名
+   */
+  readonly name: String;
+  /**
+   * コメント
+   */
+  readonly comment: String;
+  /**
+   * バリアントのリスト. 値コンストラクタ. タグ
+   */
+  readonly variantList: List<Variant>;
+};
+
+/**
+ * バリアント. 値コンストラクタ. タグ
+ * @typePartId 3f46f8bc3d52776124f9d7087d6043de
+ */
+export type Variant = {
+  /**
+   * バリアント名
+   */
+  readonly name: String;
+  /**
+   * パラメーター
+   */
+  readonly parameter: List<TypeAlias>;
+};
+
+/**
+ * 型
+ * @typePartId d77ebc32d63522c28c97693bb7c92029
+ */
+export type ElmType = "Int";
 
 /**
  * -2 147 483 648 ～ 2 147 483 647. 32bit 符号付き整数. JavaScriptのnumberとして扱える. numberの32bit符号あり整数をSigned Leb128のバイナリに変換する
@@ -4621,22 +4707,287 @@ export const StaticResourceState: {
  * Elmのコードを表現するもの
  * @typePartId 4caca9da175a9b7a74f40db96b119aec
  */
-export const ElmCode: { readonly codec: Codec<ElmCode> } = {
+export const Code: { readonly codec: Codec<Code> } = {
   codec: {
-    encode: (value: ElmCode): ReadonlyArray<number> =>
-      String.codec.encode(value.moduleName),
+    encode: (value: Code): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.moduleName)
+        .concat(
+          List.codec(TypeDeclaration.codec).encode(value.typeDefinitionList)
+        ),
     decode: (
       index: number,
       binary: Uint8Array
-    ): { readonly result: ElmCode; readonly nextIndex: number } => {
+    ): { readonly result: Code; readonly nextIndex: number } => {
       const moduleNameAndNextIndex: {
         readonly result: String;
         readonly nextIndex: number;
       } = String.codec.decode(index, binary);
+      const typeDefinitionListAndNextIndex: {
+        readonly result: List<TypeDeclaration>;
+        readonly nextIndex: number;
+      } = List.codec(TypeDeclaration.codec).decode(
+        moduleNameAndNextIndex.nextIndex,
+        binary
+      );
       return {
-        result: { moduleName: moduleNameAndNextIndex.result },
-        nextIndex: moduleNameAndNextIndex.nextIndex,
+        result: {
+          moduleName: moduleNameAndNextIndex.result,
+          typeDefinitionList: typeDefinitionListAndNextIndex.result,
+        },
+        nextIndex: typeDefinitionListAndNextIndex.nextIndex,
       };
+    },
+  },
+};
+
+/**
+ * Elmの型定義
+ * @typePartId f54affde1e82f22eb1e69b81376458ec
+ */
+export const TypeDeclaration: {
+  /**
+   * 型エイリアス. レコード型に名前を付ける
+   */
+  readonly TypeAlias: (a: TypeAlias) => TypeDeclaration;
+  /**
+   * カスタム型. 代数的データ型
+   */
+  readonly CustomType: (a: CustomType) => TypeDeclaration;
+  readonly codec: Codec<TypeDeclaration>;
+} = {
+  TypeAlias: (typeAlias: TypeAlias): TypeDeclaration => ({
+    _: "TypeAlias",
+    typeAlias,
+  }),
+  CustomType: (customType: CustomType): TypeDeclaration => ({
+    _: "CustomType",
+    customType,
+  }),
+  codec: {
+    encode: (value: TypeDeclaration): ReadonlyArray<number> => {
+      switch (value._) {
+        case "TypeAlias": {
+          return [0].concat(TypeAlias.codec.encode(value.typeAlias));
+        }
+        case "CustomType": {
+          return [1].concat(CustomType.codec.encode(value.customType));
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: TypeDeclaration; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        const result: {
+          readonly result: TypeAlias;
+          readonly nextIndex: number;
+        } = TypeAlias.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: TypeDeclaration.TypeAlias(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 1) {
+        const result: {
+          readonly result: CustomType;
+          readonly nextIndex: number;
+        } = CustomType.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: TypeDeclaration.CustomType(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
+    },
+  },
+};
+
+/**
+ * 型エイリアス. レコード型に名前を付け, その名前の関数を作成する
+ * @typePartId c4f4063b78f55ec96b8eb82b71128d37
+ */
+export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
+  codec: {
+    encode: (value: TypeAlias): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.name)
+        .concat(String.codec.encode(value.comment))
+        .concat(List.codec(Field.codec).encode(value.fieldList)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: TypeAlias; readonly nextIndex: number } => {
+      const nameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const commentAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(nameAndNextIndex.nextIndex, binary);
+      const fieldListAndNextIndex: {
+        readonly result: List<Field>;
+        readonly nextIndex: number;
+      } = List.codec(Field.codec).decode(commentAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          name: nameAndNextIndex.result,
+          comment: commentAndNextIndex.result,
+          fieldList: fieldListAndNextIndex.result,
+        },
+        nextIndex: fieldListAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * フィールド
+ * @typePartId 026a6d4ea3a1de5108e568323cd55491
+ */
+export const Field: { readonly codec: Codec<Field> } = {
+  codec: {
+    encode: (value: Field): ReadonlyArray<number> =>
+      String.codec.encode(value.name).concat(ElmType.codec.encode(value.type)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: Field; readonly nextIndex: number } => {
+      const nameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const typeAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(nameAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          name: nameAndNextIndex.result,
+          type: typeAndNextIndex.result,
+        },
+        nextIndex: typeAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * カスタム型. 代数的データ型
+ * @typePartId 05d2cf07c140dc5397635b2fdbffa73b
+ */
+export const CustomType: { readonly codec: Codec<CustomType> } = {
+  codec: {
+    encode: (value: CustomType): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.name)
+        .concat(String.codec.encode(value.comment))
+        .concat(List.codec(Variant.codec).encode(value.variantList)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: CustomType; readonly nextIndex: number } => {
+      const nameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const commentAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(nameAndNextIndex.nextIndex, binary);
+      const variantListAndNextIndex: {
+        readonly result: List<Variant>;
+        readonly nextIndex: number;
+      } = List.codec(Variant.codec).decode(
+        commentAndNextIndex.nextIndex,
+        binary
+      );
+      return {
+        result: {
+          name: nameAndNextIndex.result,
+          comment: commentAndNextIndex.result,
+          variantList: variantListAndNextIndex.result,
+        },
+        nextIndex: variantListAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * バリアント. 値コンストラクタ. タグ
+ * @typePartId 3f46f8bc3d52776124f9d7087d6043de
+ */
+export const Variant: { readonly codec: Codec<Variant> } = {
+  codec: {
+    encode: (value: Variant): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.name)
+        .concat(List.codec(TypeAlias.codec).encode(value.parameter)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: Variant; readonly nextIndex: number } => {
+      const nameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const parameterAndNextIndex: {
+        readonly result: List<TypeAlias>;
+        readonly nextIndex: number;
+      } = List.codec(TypeAlias.codec).decode(
+        nameAndNextIndex.nextIndex,
+        binary
+      );
+      return {
+        result: {
+          name: nameAndNextIndex.result,
+          parameter: parameterAndNextIndex.result,
+        },
+        nextIndex: parameterAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * 型
+ * @typePartId d77ebc32d63522c28c97693bb7c92029
+ */
+export const ElmType: {
+  /**
+   * -9007199254740991 ~ 9007199254740991 の範囲の整数
+   */
+  readonly Int: ElmType;
+  readonly codec: Codec<ElmType>;
+} = {
+  Int: "Int",
+  codec: {
+    encode: (value: ElmType): ReadonlyArray<number> => {
+      switch (value) {
+        case "Int": {
+          return [0];
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: ElmType; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        return { result: ElmType.Int, nextIndex: patternIndex.nextIndex };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
     },
   },
 };
