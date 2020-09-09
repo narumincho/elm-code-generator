@@ -122,28 +122,3 @@ const elmTypeToString = (elmType: data.ElmType): string => {
       );
   }
 };
-
-const colorTypeName = elmTypeNameFromString("Color");
-switch (colorTypeName._) {
-  case "Just": {
-    const sampleElmCode: data.Code = {
-      moduleName: "Main",
-      typeDeclarationList: [
-        data.TypeDeclaration.CustomType({
-          name: colorTypeName.value,
-          export: data.CustomTypeExportLevel.ExportTypeAndVariant,
-          comment: "色",
-          variantList: [
-            { name: "Red", parameter: [] },
-            { name: "Green", parameter: [] },
-            { name: "Blue", parameter: [] },
-          ],
-        }),
-      ],
-    };
-    console.log(codeToString(sampleElmCode));
-    break;
-  }
-  case "Nothing":
-    console.log("invalid type name");
-}

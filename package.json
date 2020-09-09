@@ -4,6 +4,7 @@
   "description": "elm-code-generator",
   "main": "main.js",
   "scripts": {
+    "test": "jest --watch --verbose false",
     "generateCode": "node ./schema/start.js"
   },
   "author": "narumincho <narumincho.starfy@gmail.com> (https://narumincho.com)",
@@ -19,7 +20,27 @@
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
     "js-ts-code-generator": "0.3.2",
-    "prettier": "2.1.1"
+    "prettier": "2.1.1",
+    "jest": "26.4.2",
+    "@types/jest": "26.0.13",
+    "ts-jest": "26.3.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "./test/tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/test/*.ts"
+    ]
   },
   "eslintConfig": {
     "extends": [
@@ -44,7 +65,8 @@
       },
       "sourceType": "module",
       "project": [
-        "./tsconfig.json"
+        "./tsconfig.json",
+        "./test/tsconfig.json"
       ]
     },
     "rules": {
