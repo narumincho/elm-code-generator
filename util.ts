@@ -1,33 +1,21 @@
 import * as data from "./data";
 import * as main from "./main";
 
-export const Array = data.ElmType.ImportedType({
-  moduleName: "Array",
-  typeName: main.elmTypeNameFromStringOrThrow("Array"),
-});
+const importedType = (moduleName: string, typeName: string): data.ElmType =>
+  data.ElmType.ImportedType({
+    moduleName,
+    typeName: main.elmTypeNameFromStringOrThrow(typeName),
+  });
+
+export const Array = importedType("Array", "Array");
 
 /** 基本の整数型 JSの出力なら -9007199254740991 ~ 9007199254740991 の範囲に対応している */
-export const Int = data.ElmType.ImportedType({
-  moduleName: "Basic",
-  typeName: main.elmTypeNameFromStringOrThrow("Int"),
-});
+export const Int = importedType("Basic", "Int");
 
-export const Float = data.ElmType.ImportedType({
-  moduleName: "Basic",
-  typeName: main.elmTypeNameFromStringOrThrow("Float"),
-});
+export const Float = importedType("Basic", "Float");
 
-export const Order = data.ElmType.ImportedType({
-  moduleName: "Basic",
-  typeName: main.elmTypeNameFromStringOrThrow("Order"),
-});
+export const Order = importedType("Basic", "Order");
 
-export const Bool = data.ElmType.ImportedType({
-  moduleName: "Basic",
-  typeName: main.elmTypeNameFromStringOrThrow("Bool"),
-});
+export const Bool = importedType("Basic", "Bool");
 
-export const String = data.ElmType.ImportedType({
-  moduleName: "String",
-  typeName: main.elmTypeNameFromStringOrThrow("String"),
-});
+export const String = importedType("String", "String");
