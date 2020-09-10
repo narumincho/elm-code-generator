@@ -2,6 +2,14 @@
 
 exports[`test invalid filed name 1`] = `"invalid field name = then"`;
 
+exports[`test output (List Int) -> String 1`] = `
+"module Main exposing ()
+
+type alias IntListToString =
+    ((List Basics.Int) -> String.String)
+"
+`;
+
 exports[`test output type alias 1`] = `
 "module Main exposing ()
 

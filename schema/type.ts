@@ -30,6 +30,8 @@ export const ElmTypeName = noParameterType(id.ElmTypeName);
 
 export const ImportedType = noParameterType(id.ImportedType);
 
+export const LocalType = noParameterType(id.LocalType);
+
 export const FunctionType = noParameterType(id.FunctionType);
 
 export const Tuple2 = noParameterType(id.Tuple2);

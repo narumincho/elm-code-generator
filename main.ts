@@ -169,12 +169,32 @@ const variantToString = (variant: data.Variant): string =>
 const elmTypeToString = (elmType: data.ElmType): string => {
   switch (elmType._) {
     case "LocalType":
-      return elmType.elmTypeName.string;
-    case "ImportedType":
+      if (elmType.localType.parameter.length === 0) {
+        return elmType.localType.typeName.string;
+      }
       return (
+        "(" +
+        elmType.localType.typeName.string +
+        " " +
+        elmType.localType.parameter.map(elmTypeToString).join(" ") +
+        ")"
+      );
+    case "ImportedType":
+      if (elmType.importedType.parameter.length === 0) {
+        return (
+          elmType.importedType.moduleName +
+          "." +
+          elmType.importedType.typeName.string
+        );
+      }
+      return (
+        "(" +
         elmType.importedType.moduleName +
         "." +
-        elmType.importedType.typeName.string
+        elmType.importedType.typeName.string +
+        " " +
+        elmType.importedType.parameter.map(elmTypeToString).join(" ") +
+        ")"
       );
     case "Function":
       return (

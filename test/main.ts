@@ -1,5 +1,6 @@
 import * as data from "../data";
 import * as main from "../main";
+import * as util from "../util";
 
 describe("test", () => {
   it("type name validation valid", () => {
@@ -61,17 +62,11 @@ describe("test", () => {
           type: data.ElmType.Record([
             {
               name: main.fieldNameFromStringOrThrow("name"),
-              type: data.ElmType.ImportedType({
-                moduleName: "String",
-                typeName: main.elmTypeNameFromStringOrThrow("String"),
-              }),
+              type: util.String,
             },
             {
               name: main.fieldNameFromStringOrThrow("age"),
-              type: data.ElmType.ImportedType({
-                moduleName: "Basics",
-                typeName: main.elmTypeNameFromStringOrThrow("Int"),
-              }),
+              type: util.Int,
             },
           ]),
         }),
@@ -92,10 +87,7 @@ describe("test", () => {
             type: data.ElmType.Record([
               {
                 name: main.fieldNameFromStringOrThrow("then"),
-                type: data.ElmType.ImportedType({
-                  moduleName: "String",
-                  typeName: main.elmTypeNameFromStringOrThrow("String"),
-                }),
+                type: util.String,
               },
             ]),
           }),
@@ -104,5 +96,23 @@ describe("test", () => {
 
       main.codeToString(sampleElmCode);
     }).toThrowErrorMatchingSnapshot();
+  });
+
+  it("output (List Int) -> String", () => {
+    const sampleElmCode: data.Code = {
+      moduleName: "Main",
+      typeDeclarationList: [
+        data.TypeDeclaration.TypeAlias({
+          name: main.elmTypeNameFromStringOrThrow("IntListToString"),
+          export: false,
+          comment: "List Int -> Stringの型",
+          type: data.ElmType.Function({
+            input: util.List(util.Int),
+            output: util.String,
+          }),
+        }),
+      ],
+    };
+    expect(main.codeToString(sampleElmCode)).toMatchSnapshot();
   });
 });

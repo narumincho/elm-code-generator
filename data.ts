@@ -1113,7 +1113,7 @@ export type VariantName = {
  */
 export type ElmType =
   | { readonly _: "ImportedType"; readonly importedType: ImportedType }
-  | { readonly _: "LocalType"; readonly elmTypeName: ElmTypeName }
+  | { readonly _: "LocalType"; readonly localType: LocalType }
   | { readonly _: "Function"; readonly functionType: FunctionType }
   | { readonly _: "Tuple0" }
   | { readonly _: "Tuple2"; readonly tuple2: Tuple2 }
@@ -1142,6 +1142,25 @@ export type ImportedType = {
    * 型名
    */
   readonly typeName: ElmTypeName;
+  /**
+   * 型パラメーター
+   */
+  readonly parameter: List<ElmType>;
+};
+
+/**
+ * モジュール内の型
+ * @typePartId 8c6aa1fa5b44a4b7a1962393574f2c7b
+ */
+export type LocalType = {
+  /**
+   * 型名
+   */
+  readonly typeName: ElmTypeName;
+  /**
+   * 型パラメーター
+   */
+  readonly parameter: List<ElmType>;
 };
 
 /**
@@ -5256,7 +5275,7 @@ export const ElmType: {
   /**
    * モジュール内にある型
    */
-  readonly LocalType: (a: ElmTypeName) => ElmType;
+  readonly LocalType: (a: LocalType) => ElmType;
   /**
    * 関数
    */
@@ -5283,10 +5302,7 @@ export const ElmType: {
     _: "ImportedType",
     importedType,
   }),
-  LocalType: (elmTypeName: ElmTypeName): ElmType => ({
-    _: "LocalType",
-    elmTypeName,
-  }),
+  LocalType: (localType: LocalType): ElmType => ({ _: "LocalType", localType }),
   Function: (functionType: FunctionType): ElmType => ({
     _: "Function",
     functionType,
@@ -5302,7 +5318,7 @@ export const ElmType: {
           return [0].concat(ImportedType.codec.encode(value.importedType));
         }
         case "LocalType": {
-          return [1].concat(ElmTypeName.codec.encode(value.elmTypeName));
+          return [1].concat(LocalType.codec.encode(value.localType));
         }
         case "Function": {
           return [2].concat(FunctionType.codec.encode(value.functionType));
@@ -5341,9 +5357,9 @@ export const ElmType: {
       }
       if (patternIndex.result === 1) {
         const result: {
-          readonly result: ElmTypeName;
+          readonly result: LocalType;
           readonly nextIndex: number;
-        } = ElmTypeName.codec.decode(patternIndex.nextIndex, binary);
+        } = LocalType.codec.decode(patternIndex.nextIndex, binary);
         return {
           result: ElmType.LocalType(result.result),
           nextIndex: result.nextIndex,
@@ -5452,7 +5468,8 @@ export const ImportedType: { readonly codec: Codec<ImportedType> } = {
     encode: (value: ImportedType): ReadonlyArray<number> =>
       String.codec
         .encode(value.moduleName)
-        .concat(ElmTypeName.codec.encode(value.typeName)),
+        .concat(ElmTypeName.codec.encode(value.typeName))
+        .concat(List.codec(ElmType.codec).encode(value.parameter)),
     decode: (
       index: number,
       binary: Uint8Array
@@ -5465,12 +5482,56 @@ export const ImportedType: { readonly codec: Codec<ImportedType> } = {
         readonly result: ElmTypeName;
         readonly nextIndex: number;
       } = ElmTypeName.codec.decode(moduleNameAndNextIndex.nextIndex, binary);
+      const parameterAndNextIndex: {
+        readonly result: List<ElmType>;
+        readonly nextIndex: number;
+      } = List.codec(ElmType.codec).decode(
+        typeNameAndNextIndex.nextIndex,
+        binary
+      );
       return {
         result: {
           moduleName: moduleNameAndNextIndex.result,
           typeName: typeNameAndNextIndex.result,
+          parameter: parameterAndNextIndex.result,
         },
-        nextIndex: typeNameAndNextIndex.nextIndex,
+        nextIndex: parameterAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * モジュール内の型
+ * @typePartId 8c6aa1fa5b44a4b7a1962393574f2c7b
+ */
+export const LocalType: { readonly codec: Codec<LocalType> } = {
+  codec: {
+    encode: (value: LocalType): ReadonlyArray<number> =>
+      ElmTypeName.codec
+        .encode(value.typeName)
+        .concat(List.codec(ElmType.codec).encode(value.parameter)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: LocalType; readonly nextIndex: number } => {
+      const typeNameAndNextIndex: {
+        readonly result: ElmTypeName;
+        readonly nextIndex: number;
+      } = ElmTypeName.codec.decode(index, binary);
+      const parameterAndNextIndex: {
+        readonly result: List<ElmType>;
+        readonly nextIndex: number;
+      } = List.codec(ElmType.codec).decode(
+        typeNameAndNextIndex.nextIndex,
+        binary
+      );
+      return {
+        result: {
+          typeName: typeNameAndNextIndex.result,
+          parameter: parameterAndNextIndex.result,
+        },
+        nextIndex: parameterAndNextIndex.nextIndex,
       };
     },
   },

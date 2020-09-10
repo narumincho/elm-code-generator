@@ -218,7 +218,7 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
         {
           name: "LocalType",
           description: "モジュール内にある型",
-          parameter: data.Maybe.Just(type.ElmTypeName),
+          parameter: data.Maybe.Just(type.LocalType),
         },
         {
           name: "Function",
@@ -277,6 +277,30 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           name: "typeName",
           description: "型名",
           type: type.ElmTypeName,
+        },
+        {
+          name: "parameter",
+          description: "型パラメーター",
+          type: coreType.List(type.ElmType),
+        },
+      ])
+    ),
+  ],
+  [
+    id.LocalType,
+    t(
+      "LocalType",
+      "モジュール内の型",
+      data.TypePartBody.Product([
+        {
+          name: "typeName",
+          description: "型名",
+          type: type.ElmTypeName,
+        },
+        {
+          name: "parameter",
+          description: "型パラメーター",
+          type: coreType.List(type.ElmType),
         },
       ])
     ),

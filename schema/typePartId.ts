@@ -24,6 +24,8 @@ export const ElmTypeName = "198ee2d0f233e3fcc7638c360e522bfd" as T;
 
 export const ImportedType = "c6b9d7ee91a4237a8babbf9eaf91fb67" as T;
 
+export const LocalType = "8c6aa1fa5b44a4b7a1962393574f2c7b" as T;
+
 export const FunctionType = "06d1479f7c69ca39d8887709ab439633" as T;
 
 export const Tuple2 = "4622e3d9977a5fc8401827b1417e67eb" as T;
