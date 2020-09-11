@@ -42,6 +42,9 @@
       "**/test/*.ts"
     ]
   },
+  "engines": {
+    "node": ">=12.18.3"
+  },
   "eslintConfig": {
     "extends": [
       "eslint:all",

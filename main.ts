@@ -1,5 +1,4 @@
 import * as data from "./data";
-import { strict } from "assert";
 
 const reservedWord = new Set([
   "if",
@@ -101,6 +100,8 @@ export const codeToString = (elmCode: data.Code): string => {
     elmCode.typeDeclarationList.map(typeDeclarationToExportName).join(", ") +
     ")" +
     "\n\n" +
+    codeToImportSection(elmCode) +
+    "\n\n" +
     elmCode.typeDeclarationList.map(typeDeclarationToString).join("\n\n") +
     "\n"
   );
@@ -119,6 +120,11 @@ const typeDeclarationToExportName = (
       return "";
   }
 };
+
+const codeToImportSection = (code: data.Code): string =>
+  [...collectModuleName(code)]
+    .map((moduleName): string => "import " + moduleName)
+    .join("\n");
 
 const customTypeToExportName = (customType: data.CustomType): string => {
   switch (customType.export) {
@@ -230,5 +236,67 @@ const elmTypeToString = (elmType: data.ElmType): string => {
         elmType.fieldList.map((e): string => fieldToString(e)).join(", ") +
         " }"
       );
+  }
+};
+
+const collectModuleName = (code: data.Code): ReadonlySet<string> =>
+  new Set(
+    code.typeDeclarationList.flatMap(
+      (typeDeclaration): ReadonlyArray<string> => {
+        switch (typeDeclaration._) {
+          case "CustomType":
+            return [
+              ...collectModuleNameInCustomType(typeDeclaration.customType),
+            ];
+          case "TypeAlias":
+            return [...collectModuleNameInType(typeDeclaration.typeAlias.type)];
+        }
+      }
+    )
+  );
+
+const collectModuleNameInCustomType = (
+  customType: data.CustomType
+): ReadonlySet<string> =>
+  new Set(
+    customType.variantList.flatMap((variant) =>
+      variant.parameter.flatMap((parameter) => [
+        ...collectModuleNameInType(parameter),
+      ])
+    )
+  );
+
+const collectModuleNameInType = (
+  elmType: data.ElmType
+): ReadonlySet<string> => {
+  switch (elmType._) {
+    case "Function":
+      return new Set([
+        ...collectModuleNameInType(elmType.functionType.input),
+        ...collectModuleNameInType(elmType.functionType.output),
+      ]);
+    case "ImportedType":
+      return new Set([elmType.importedType.moduleName]);
+    case "LocalType":
+      return new Set();
+    case "Record":
+      return new Set(
+        elmType.fieldList.flatMap((field) => [
+          ...collectModuleNameInType(field.type),
+        ])
+      );
+    case "Tuple0":
+      return new Set();
+    case "Tuple2":
+      return new Set([
+        ...collectModuleNameInType(elmType.tuple2.first),
+        ...collectModuleNameInType(elmType.tuple2.second),
+      ]);
+    case "Tuple3":
+      return new Set([
+        ...collectModuleNameInType(elmType.tuple3.first),
+        ...collectModuleNameInType(elmType.tuple3.second),
+        ...collectModuleNameInType(elmType.tuple3.third),
+      ]);
   }
 };
