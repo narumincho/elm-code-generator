@@ -93,6 +93,8 @@ export const elmTypeNameFromStringOrThrow = (
 };
 
 export const codeToString = (elmCode: data.Code): string => {
+  checkDuplicateTypeDeclamationName(elmCode);
+
   return (
     "module " +
     elmCode.moduleName +
@@ -105,6 +107,30 @@ export const codeToString = (elmCode: data.Code): string => {
     elmCode.typeDeclarationList.map(typeDeclarationToString).join("\n\n") +
     "\n"
   );
+};
+
+const checkDuplicateTypeDeclamationName = (elmCode: data.Code): void => {
+  const nameSet = new Set<string>();
+  for (const typeDeclaration of elmCode.typeDeclarationList) {
+    const nameAsString = getTypeDeclarationName(typeDeclaration).string;
+    if (nameSet.has(nameAsString)) {
+      throw new Error(
+        "duplicate type declaration name. name = " + nameAsString
+      );
+    }
+    nameSet.add(nameAsString);
+  }
+};
+
+const getTypeDeclarationName = (
+  typeDeclaration: data.TypeDeclaration
+): data.ElmTypeName => {
+  switch (typeDeclaration._) {
+    case "CustomType":
+      return typeDeclaration.customType.name;
+    case "TypeAlias":
+      return typeDeclaration.typeAlias.name;
+  }
 };
 
 const typeDeclarationToExportName = (
