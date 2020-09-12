@@ -26,6 +26,7 @@ describe("test", () => {
               name: colorTypeName.value,
               export: data.CustomTypeExportLevel.ExportTypeAndVariant,
               comment: "色",
+              parameter: [],
               variantList: [
                 {
                   name: main.variantNameFormStringOrThrow("Red"),
@@ -59,6 +60,7 @@ describe("test", () => {
           name: main.elmTypeNameFromStringOrThrow("User"),
           export: false,
           comment: "色",
+          parameter: [],
           type: data.ElmType.Record([
             {
               name: main.fieldNameFromStringOrThrow("name"),
@@ -84,6 +86,7 @@ describe("test", () => {
             name: main.elmTypeNameFromStringOrThrow("IncludeInvalidFiledName"),
             export: false,
             comment: "",
+            parameter: [],
             type: data.ElmType.Record([
               {
                 name: main.fieldNameFromStringOrThrow("then"),
@@ -106,6 +109,7 @@ describe("test", () => {
           name: main.elmTypeNameFromStringOrThrow("IntListToString"),
           export: false,
           comment: "List Int -> Stringの型",
+          parameter: [],
           type: data.ElmType.Function({
             input: util.List(util.Int),
             output: util.String,
@@ -114,5 +118,26 @@ describe("test", () => {
       ],
     };
     expect(main.codeToString(sampleElmCode)).toMatchSnapshot();
+  });
+
+  it("output type parameter", () => {
+    const sampleCode: data.Code = {
+      moduleName: "Main",
+      typeDeclarationList: [
+        data.TypeDeclaration.TypeAlias({
+          name: main.elmTypeNameFromStringOrThrow("WithParameter"),
+          export: false,
+          comment: "型パラメーターがつくもの",
+          parameter: ["element"],
+          type: data.ElmType.Record([
+            {
+              name: main.fieldNameFromStringOrThrow("field"),
+              type: data.ElmType.TypeParameter("element"),
+            },
+          ]),
+        }),
+      ],
+    };
+    expect(main.codeToString(sampleCode)).toMatchSnapshot();
   });
 });

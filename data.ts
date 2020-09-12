@@ -1025,6 +1025,10 @@ export type TypeAlias = {
    */
   readonly comment: String;
   /**
+   * 型パラメーター
+   */
+  readonly parameter: List<String>;
+  /**
    * 別名を付ける型
    */
   readonly type: ElmType;
@@ -1068,6 +1072,10 @@ export type CustomType = {
    * コメント
    */
   readonly comment: String;
+  /**
+   * 型パラメーター
+   */
+  readonly parameter: List<String>;
   /**
    * バリアントのリスト. 値コンストラクタ. タグ
    */
@@ -1114,6 +1122,7 @@ export type VariantName = {
 export type ElmType =
   | { readonly _: "ImportedType"; readonly importedType: ImportedType }
   | { readonly _: "LocalType"; readonly localType: LocalType }
+  | { readonly _: "TypeParameter"; readonly string: String }
   | { readonly _: "Function"; readonly functionType: FunctionType }
   | { readonly _: "Tuple0" }
   | { readonly _: "Tuple2"; readonly tuple2: Tuple2 }
@@ -4950,6 +4959,7 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
         .encode(value.name)
         .concat(Bool.codec.encode(value.export))
         .concat(String.codec.encode(value.comment))
+        .concat(List.codec(String.codec).encode(value.parameter))
         .concat(ElmType.codec.encode(value.type)),
     decode: (
       index: number,
@@ -4967,15 +4977,23 @@ export const TypeAlias: { readonly codec: Codec<TypeAlias> } = {
         readonly result: String;
         readonly nextIndex: number;
       } = String.codec.decode(exportAndNextIndex.nextIndex, binary);
+      const parameterAndNextIndex: {
+        readonly result: List<String>;
+        readonly nextIndex: number;
+      } = List.codec(String.codec).decode(
+        commentAndNextIndex.nextIndex,
+        binary
+      );
       const typeAndNextIndex: {
         readonly result: ElmType;
         readonly nextIndex: number;
-      } = ElmType.codec.decode(commentAndNextIndex.nextIndex, binary);
+      } = ElmType.codec.decode(parameterAndNextIndex.nextIndex, binary);
       return {
         result: {
           name: nameAndNextIndex.result,
           export: exportAndNextIndex.result,
           comment: commentAndNextIndex.result,
+          parameter: parameterAndNextIndex.result,
           type: typeAndNextIndex.result,
         },
         nextIndex: typeAndNextIndex.nextIndex,
@@ -5074,6 +5092,7 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
         .encode(value.name)
         .concat(CustomTypeExportLevel.codec.encode(value.export))
         .concat(String.codec.encode(value.comment))
+        .concat(List.codec(String.codec).encode(value.parameter))
         .concat(List.codec(Variant.codec).encode(value.variantList)),
     decode: (
       index: number,
@@ -5094,11 +5113,18 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
         readonly result: String;
         readonly nextIndex: number;
       } = String.codec.decode(exportAndNextIndex.nextIndex, binary);
+      const parameterAndNextIndex: {
+        readonly result: List<String>;
+        readonly nextIndex: number;
+      } = List.codec(String.codec).decode(
+        commentAndNextIndex.nextIndex,
+        binary
+      );
       const variantListAndNextIndex: {
         readonly result: List<Variant>;
         readonly nextIndex: number;
       } = List.codec(Variant.codec).decode(
-        commentAndNextIndex.nextIndex,
+        parameterAndNextIndex.nextIndex,
         binary
       );
       return {
@@ -5106,6 +5132,7 @@ export const CustomType: { readonly codec: Codec<CustomType> } = {
           name: nameAndNextIndex.result,
           export: exportAndNextIndex.result,
           comment: commentAndNextIndex.result,
+          parameter: parameterAndNextIndex.result,
           variantList: variantListAndNextIndex.result,
         },
         nextIndex: variantListAndNextIndex.nextIndex,
@@ -5277,6 +5304,10 @@ export const ElmType: {
    */
   readonly LocalType: (a: LocalType) => ElmType;
   /**
+   * 型パラメーター
+   */
+  readonly TypeParameter: (a: String) => ElmType;
+  /**
    * 関数
    */
   readonly Function: (a: FunctionType) => ElmType;
@@ -5303,6 +5334,10 @@ export const ElmType: {
     importedType,
   }),
   LocalType: (localType: LocalType): ElmType => ({ _: "LocalType", localType }),
+  TypeParameter: (string_: String): ElmType => ({
+    _: "TypeParameter",
+    string: string_,
+  }),
   Function: (functionType: FunctionType): ElmType => ({
     _: "Function",
     functionType,
@@ -5320,20 +5355,23 @@ export const ElmType: {
         case "LocalType": {
           return [1].concat(LocalType.codec.encode(value.localType));
         }
+        case "TypeParameter": {
+          return [2].concat(String.codec.encode(value.string));
+        }
         case "Function": {
-          return [2].concat(FunctionType.codec.encode(value.functionType));
+          return [3].concat(FunctionType.codec.encode(value.functionType));
         }
         case "Tuple0": {
-          return [3];
+          return [4];
         }
         case "Tuple2": {
-          return [4].concat(Tuple2.codec.encode(value.tuple2));
+          return [5].concat(Tuple2.codec.encode(value.tuple2));
         }
         case "Tuple3": {
-          return [5].concat(Tuple3.codec.encode(value.tuple3));
+          return [6].concat(Tuple3.codec.encode(value.tuple3));
         }
         case "Record": {
-          return [6].concat(List.codec(Field.codec).encode(value.fieldList));
+          return [7].concat(List.codec(Field.codec).encode(value.fieldList));
         }
       }
     },
@@ -5367,6 +5405,16 @@ export const ElmType: {
       }
       if (patternIndex.result === 2) {
         const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.TypeParameter(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 3) {
+        const result: {
           readonly result: FunctionType;
           readonly nextIndex: number;
         } = FunctionType.codec.decode(patternIndex.nextIndex, binary);
@@ -5375,10 +5423,10 @@ export const ElmType: {
           nextIndex: result.nextIndex,
         };
       }
-      if (patternIndex.result === 3) {
+      if (patternIndex.result === 4) {
         return { result: ElmType.Tuple0, nextIndex: patternIndex.nextIndex };
       }
-      if (patternIndex.result === 4) {
+      if (patternIndex.result === 5) {
         const result: {
           readonly result: Tuple2;
           readonly nextIndex: number;
@@ -5388,7 +5436,7 @@ export const ElmType: {
           nextIndex: result.nextIndex,
         };
       }
-      if (patternIndex.result === 5) {
+      if (patternIndex.result === 6) {
         const result: {
           readonly result: Tuple3;
           readonly nextIndex: number;
@@ -5398,7 +5446,7 @@ export const ElmType: {
           nextIndex: result.nextIndex,
         };
       }
-      if (patternIndex.result === 6) {
+      if (patternIndex.result === 7) {
         const result: {
           readonly result: List<Field>;
           readonly nextIndex: number;

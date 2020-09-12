@@ -177,6 +177,9 @@ const typeDeclarationToString = (
 const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   "type alias " +
   typeAlias.name.string +
+  (typeAlias.parameter.length === 0
+    ? ""
+    : " " + typeAlias.parameter.join(" ")) +
   " =\n" +
   indent +
   elmTypeToString(typeAlias.type);
@@ -187,6 +190,9 @@ const fieldToString = (field: data.Field): string =>
 const customTypeToString = (customType: data.CustomType): string =>
   "type " +
   customType.name.string +
+  (customType.parameter.length === 0
+    ? ""
+    : " " + customType.parameter.join(" ")) +
   "\n" +
   indent +
   "= " +
@@ -228,6 +234,8 @@ const elmTypeToString = (elmType: data.ElmType): string => {
         elmType.importedType.parameter.map(elmTypeToString).join(" ") +
         ")"
       );
+    case "TypeParameter":
+      return elmType.string;
     case "Function":
       return (
         "(" +
@@ -303,6 +311,8 @@ const collectModuleNameInType = (
       ]);
     case "ImportedType":
       return new Set([elmType.importedType.moduleName]);
+    case "TypeParameter":
+      return new Set();
     case "LocalType":
       return new Set();
     case "Record":

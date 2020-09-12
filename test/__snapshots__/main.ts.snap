@@ -23,6 +23,16 @@ type alias User =
 "
 `;
 
+exports[`test output type parameter 1`] = `
+"module Main exposing ()
+
+
+
+type alias WithParameter element =
+    { field : element }
+"
+`;
+
 exports[`test output variant 1`] = `
 "module Main exposing (Color(..))
 

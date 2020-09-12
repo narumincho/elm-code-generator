@@ -84,6 +84,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           type: coreType.String,
         },
         {
+          name: "parameter",
+          description: "型パラメーター",
+          type: coreType.List(coreType.String),
+        },
+        {
           name: "type",
           description: "別名を付ける型",
           type: type.ElmType,
@@ -140,6 +145,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           name: "comment",
           description: "コメント",
           type: coreType.String,
+        },
+        {
+          name: "parameter",
+          description: "型パラメーター",
+          type: coreType.List(coreType.String),
         },
         {
           name: "variantList",
@@ -219,6 +229,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           name: "LocalType",
           description: "モジュール内にある型",
           parameter: data.Maybe.Just(type.LocalType),
+        },
+        {
+          name: "TypeParameter",
+          description: "型パラメーター",
+          parameter: data.Maybe.Just(coreType.String),
         },
         {
           name: "Function",
