@@ -175,6 +175,7 @@ const typeDeclarationToString = (
 };
 
 const typeAliasToString = (typeAlias: data.TypeAlias): string =>
+  commentToString(typeAlias.comment) +
   "type alias " +
   typeAlias.name.string +
   (typeAlias.parameter.length === 0
@@ -184,10 +185,18 @@ const typeAliasToString = (typeAlias: data.TypeAlias): string =>
   indent +
   elmTypeToString(typeAlias.type);
 
+const commentToString = (comment: string): string => {
+  if (comment.length === 0) {
+    return "";
+  }
+  return "{-| " + comment + "\n-}\n";
+};
+
 const fieldToString = (field: data.Field): string =>
   field.name.string + " : " + elmTypeToString(field.type);
 
 const customTypeToString = (customType: data.CustomType): string =>
+  commentToString(customType.comment) +
   "type " +
   customType.name.string +
   (customType.parameter.length === 0

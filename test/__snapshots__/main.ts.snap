@@ -18,6 +18,8 @@ exports[`test output type alias 1`] = `
 import String
 import Basics
 
+{-| 色
+-}
 type alias User =
     { name : String.String, age : Basics.Int }
 "
@@ -28,6 +30,8 @@ exports[`test output type parameter 1`] = `
 
 
 
+{-| 型パラメーターがつくもの
+-}
 type alias WithParameter element =
     { field : element }
 "
@@ -38,6 +42,8 @@ exports[`test output variant 1`] = `
 
 
 
+{-| 色
+-}
 type Color
     = Red
     | Green
