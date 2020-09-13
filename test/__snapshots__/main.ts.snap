@@ -7,6 +7,8 @@ exports[`test output (List Int) -> String 1`] = `
 
 import String
 
+{-| List Int -> Stringの型
+-}
 type alias IntListToString =
     ((List Basics.Int) -> String.String)
 "
