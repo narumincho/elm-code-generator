@@ -1,4 +1,5 @@
 node_modules
+schemaJs
 .npmignore
 .gitignore
 .github
