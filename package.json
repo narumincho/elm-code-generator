@@ -2,7 +2,7 @@
   "name": "elm-code-generator",
   "version": "0.0.0",
   "description": "elm-code-generator",
-  "main": "main.js",
+  "main": "source/main.js",
   "scripts": {
     "test": "jest --watch --verbose false",
     "generateCode": "node ./schema/start.js"

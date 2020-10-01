@@ -3,7 +3,7 @@
     "target": "ES2019",
     "module": "CommonJS",
     "lib": ["ES2020", "DOM"],
-    "newLine": "LF",
+    "newLine": "lf",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true
