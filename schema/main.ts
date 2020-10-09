@@ -12,7 +12,7 @@ const typeScriptCode = codeGen.generateCodeAsString(
   "TypeScript"
 );
 
-const typeScriptPath = "data.ts";
+const typeScriptPath = "source/data.ts";
 fs.promises
   .writeFile(
     typeScriptPath,
