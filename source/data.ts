@@ -1133,6 +1133,7 @@ export type ElmType =
   | { readonly _: "LocalType"; readonly localType: LocalType }
   | { readonly _: "TypeParameter"; readonly string: String }
   | { readonly _: "Function"; readonly functionType: FunctionType }
+  | { readonly _: "List"; readonly elmType: ElmType }
   | { readonly _: "Tuple0" }
   | { readonly _: "Tuple2"; readonly tuple2: Tuple2 }
   | { readonly _: "Tuple3"; readonly tuple3: Tuple3 }
@@ -5359,6 +5360,10 @@ export const ElmType: {
    */
   readonly Function: (a: FunctionType) => ElmType;
   /**
+   * List リスト
+   */
+  readonly List: (a: ElmType) => ElmType;
+  /**
    * () 値を1つだけ持つ型. Unit
    */
   readonly Tuple0: ElmType;
@@ -5389,6 +5394,7 @@ export const ElmType: {
     _: "Function",
     functionType,
   }),
+  List: (elmType: ElmType): ElmType => ({ _: "List", elmType }),
   Tuple0: { _: "Tuple0" },
   Tuple2: (tuple2: Tuple2): ElmType => ({ _: "Tuple2", tuple2 }),
   Tuple3: (tuple3: Tuple3): ElmType => ({ _: "Tuple3", tuple3 }),
@@ -5408,17 +5414,20 @@ export const ElmType: {
         case "Function": {
           return [3].concat(FunctionType.codec.encode(value.functionType));
         }
+        case "List": {
+          return [4].concat(ElmType.codec.encode(value.elmType));
+        }
         case "Tuple0": {
-          return [4];
+          return [5];
         }
         case "Tuple2": {
-          return [5].concat(Tuple2.codec.encode(value.tuple2));
+          return [6].concat(Tuple2.codec.encode(value.tuple2));
         }
         case "Tuple3": {
-          return [6].concat(Tuple3.codec.encode(value.tuple3));
+          return [7].concat(Tuple3.codec.encode(value.tuple3));
         }
         case "Record": {
-          return [7].concat(List.codec(Field.codec).encode(value.fieldList));
+          return [8].concat(List.codec(Field.codec).encode(value.fieldList));
         }
       }
     },
@@ -5471,9 +5480,19 @@ export const ElmType: {
         };
       }
       if (patternIndex.result === 4) {
-        return { result: ElmType.Tuple0, nextIndex: patternIndex.nextIndex };
+        const result: {
+          readonly result: ElmType;
+          readonly nextIndex: number;
+        } = ElmType.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmType.List(result.result),
+          nextIndex: result.nextIndex,
+        };
       }
       if (patternIndex.result === 5) {
+        return { result: ElmType.Tuple0, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 6) {
         const result: {
           readonly result: Tuple2;
           readonly nextIndex: number;
@@ -5483,7 +5502,7 @@ export const ElmType: {
           nextIndex: result.nextIndex,
         };
       }
-      if (patternIndex.result === 6) {
+      if (patternIndex.result === 7) {
         const result: {
           readonly result: Tuple3;
           readonly nextIndex: number;
@@ -5493,7 +5512,7 @@ export const ElmType: {
           nextIndex: result.nextIndex,
         };
       }
-      if (patternIndex.result === 7) {
+      if (patternIndex.result === 8) {
         const result: {
           readonly result: List<Field>;
           readonly nextIndex: number;

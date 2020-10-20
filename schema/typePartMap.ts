@@ -241,6 +241,11 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
           parameter: data.Maybe.Just(type.FunctionType),
         },
         {
+          name: "List",
+          description: "List リスト",
+          parameter: data.Maybe.Just(type.ElmType),
+        },
+        {
           name: "Tuple0",
           description: "() 値を1つだけ持つ型. Unit",
           parameter: data.Maybe.Nothing(),

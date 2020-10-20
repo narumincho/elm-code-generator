@@ -30,12 +30,6 @@ export const String = importedType("String", "String", []);
 
 export const Char = importedType("Char", "Char", []);
 
-export const List = (elementType: data.ElmType): data.ElmType =>
-  data.ElmType.LocalType({
-    typeName: main.elmTypeNameFromStringOrThrow("List"),
-    parameter: [elementType],
-  });
-
 /** https://package.elm-lang.org/packages/elm/core/latest/Maybe#Maybe */
 export const Maybe = (a: data.ElmType): data.ElmType =>
   importedType("Maybe", "Maybe", [a]);

@@ -111,7 +111,7 @@ describe("test", () => {
           comment: "List Int -> Stringの型",
           parameter: [],
           type: data.ElmType.Function({
-            input: util.List(util.Int),
+            input: data.ElmType.List(util.Int),
             output: util.String,
           }),
         }),

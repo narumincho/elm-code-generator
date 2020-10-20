@@ -253,6 +253,8 @@ const elmTypeToString = (elmType: data.ElmType): string => {
         elmTypeToString(elmType.functionType.output) +
         ")"
       );
+    case "List":
+      return "(List " + elmTypeToString(elmType.elmType) + ")";
     case "Tuple0":
       return "()";
     case "Tuple2":
@@ -330,6 +332,8 @@ const collectModuleNameInType = (
           ...collectModuleNameInType(field.type),
         ])
       );
+    case "List":
+      return new Set();
     case "Tuple0":
       return new Set();
     case "Tuple2":
