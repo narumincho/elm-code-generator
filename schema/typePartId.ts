@@ -31,3 +31,7 @@ export const FunctionType = "06d1479f7c69ca39d8887709ab439633" as T;
 export const Tuple2 = "4622e3d9977a5fc8401827b1417e67eb" as T;
 
 export const Tuple3 = "d47c37ba40815c1ece2415fd7d8baa1d" as T;
+
+export const ElmDefinition = "f8fa01937b2fc61f9a818331597b3bbd" as T;
+
+export const ElmExpr = "66b80a47ac0e422c652ea77318e2baf2" as T;

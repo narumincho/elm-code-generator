@@ -387,4 +387,143 @@ export const typePartMap: ReadonlyMap<data.TypePartId, data.TypePart> = new Map<
       ])
     ),
   ],
+  [
+    id.ElmDefinition,
+    t(
+      "ElmDefinition",
+      "Elmの関数の定義. 引数がない関数(定数)も含まれる",
+      data.TypePartBody.Product([
+        {
+          name: "name",
+          description: "関数名",
+          type: coreType.String,
+        },
+        {
+          name: "type",
+          description: "型",
+          type: type.ElmType,
+        },
+        {
+          name: "expr",
+          description: "式",
+          type: type.ElmExpr,
+        },
+        {
+          name: "comment",
+          description: "コメント",
+          type: coreType.String,
+        },
+      ])
+    ),
+  ],
+  [
+    id.ElmExpr,
+    t(
+      "ElmExpr",
+      "Elmの式",
+      data.TypePartBody.Sum([
+        {
+          name: "StringLiteral",
+          description: "文字列リテラル",
+          parameter: data.Maybe.Just(coreType.String),
+        },
+        {
+          name: "IntLiteral",
+          description: "整数リテラル",
+          parameter: data.Maybe.Just(coreType.Int32),
+        },
+        {
+          name: "LocalVariant",
+          description:
+            "ファイル内で定義したバリアント. 値コンストラクタ. タグ.",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "ImportedVariant",
+          description: "インポートしたバリアント. 値コンストラクタ. タグ.",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "List",
+          description: "リストリテラル",
+          parameter: data.Maybe.Just(coreType.List(type.ElmExpr)),
+        },
+        {
+          name: "Op",
+          description: "????",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Negate",
+          description: "単行マイナス",
+          parameter: data.Maybe.Just(type.ElmExpr),
+        },
+        {
+          name: "Binops",
+          description: "????",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Lambda",
+          description: "ラムダ式. 関数リテラル",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Call",
+          description: "関数呼び出し",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "If",
+          description: "if式. else ifも含めている",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Let",
+          description: "let式. ローカル関数定義",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Case",
+          description: "case式",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Accessor",
+          description: "アクセサ .name メンバーを取得する関数",
+          parameter: data.Maybe.Just(coreType.String),
+        },
+        {
+          name: "Access",
+          description: "user.name メンバー取得",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Update",
+          description: '{ user | name = "新しい名前" }',
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Record",
+          description: 'レコード. { name = "名前", age = 20 }',
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Unit",
+          description: "Unit. ()",
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Tuple2",
+          description: '2つの要素のタプル. (1, "あ")',
+          parameter: data.Maybe.Nothing(),
+        },
+        {
+          name: "Tuple3",
+          description: '3つの要素のタプル. (1, "い", 3)',
+          parameter: data.Maybe.Nothing(),
+        },
+      ])
+    ),
+  ],
 ]);

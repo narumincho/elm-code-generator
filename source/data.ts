@@ -1232,6 +1232,55 @@ export type Tuple3 = {
 };
 
 /**
+ * Elmの関数の定義. 引数がない関数(定数)も含まれる
+ * @typePartId f8fa01937b2fc61f9a818331597b3bbd
+ */
+export type ElmDefinition = {
+  /**
+   * 関数名
+   */
+  readonly name: String;
+  /**
+   * 型
+   */
+  readonly type: ElmType;
+  /**
+   * 式
+   */
+  readonly expr: ElmExpr;
+  /**
+   * コメント
+   */
+  readonly comment: String;
+};
+
+/**
+ * Elmの式
+ * @typePartId 66b80a47ac0e422c652ea77318e2baf2
+ */
+export type ElmExpr =
+  | { readonly _: "StringLiteral"; readonly string: String }
+  | { readonly _: "IntLiteral"; readonly int32: Int32 }
+  | { readonly _: "LocalVariant" }
+  | { readonly _: "ImportedVariant" }
+  | { readonly _: "List"; readonly elmExprList: List<ElmExpr> }
+  | { readonly _: "Op" }
+  | { readonly _: "Negate"; readonly elmExpr: ElmExpr }
+  | { readonly _: "Binops" }
+  | { readonly _: "Lambda" }
+  | { readonly _: "Call" }
+  | { readonly _: "If" }
+  | { readonly _: "Let" }
+  | { readonly _: "Case" }
+  | { readonly _: "Accessor"; readonly string: String }
+  | { readonly _: "Access" }
+  | { readonly _: "Update" }
+  | { readonly _: "Record" }
+  | { readonly _: "Unit" }
+  | { readonly _: "Tuple2" }
+  | { readonly _: "Tuple3" };
+
+/**
  * -2 147 483 648 ～ 2 147 483 647. 32bit 符号付き整数. JavaScriptのnumberとして扱える. numberの32bit符号あり整数をSigned Leb128のバイナリに変換する
  * @typePartId ccf22e92cea3639683c0271d65d00673
  */
@@ -5752,6 +5801,342 @@ export const Tuple3: { readonly codec: Codec<Tuple3> } = {
         },
         nextIndex: thirdAndNextIndex.nextIndex,
       };
+    },
+  },
+};
+
+/**
+ * Elmの関数の定義. 引数がない関数(定数)も含まれる
+ * @typePartId f8fa01937b2fc61f9a818331597b3bbd
+ */
+export const ElmDefinition: { readonly codec: Codec<ElmDefinition> } = {
+  codec: {
+    encode: (value: ElmDefinition): ReadonlyArray<number> =>
+      String.codec
+        .encode(value.name)
+        .concat(ElmType.codec.encode(value.type))
+        .concat(ElmExpr.codec.encode(value.expr))
+        .concat(String.codec.encode(value.comment)),
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: ElmDefinition; readonly nextIndex: number } => {
+      const nameAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(index, binary);
+      const typeAndNextIndex: {
+        readonly result: ElmType;
+        readonly nextIndex: number;
+      } = ElmType.codec.decode(nameAndNextIndex.nextIndex, binary);
+      const exprAndNextIndex: {
+        readonly result: ElmExpr;
+        readonly nextIndex: number;
+      } = ElmExpr.codec.decode(typeAndNextIndex.nextIndex, binary);
+      const commentAndNextIndex: {
+        readonly result: String;
+        readonly nextIndex: number;
+      } = String.codec.decode(exprAndNextIndex.nextIndex, binary);
+      return {
+        result: {
+          name: nameAndNextIndex.result,
+          type: typeAndNextIndex.result,
+          expr: exprAndNextIndex.result,
+          comment: commentAndNextIndex.result,
+        },
+        nextIndex: commentAndNextIndex.nextIndex,
+      };
+    },
+  },
+};
+
+/**
+ * Elmの式
+ * @typePartId 66b80a47ac0e422c652ea77318e2baf2
+ */
+export const ElmExpr: {
+  /**
+   * 文字列リテラル
+   */
+  readonly StringLiteral: (a: String) => ElmExpr;
+  /**
+   * 整数リテラル
+   */
+  readonly IntLiteral: (a: Int32) => ElmExpr;
+  /**
+   * ファイル内で定義したバリアント. 値コンストラクタ. タグ.
+   */
+  readonly LocalVariant: ElmExpr;
+  /**
+   * インポートしたバリアント. 値コンストラクタ. タグ.
+   */
+  readonly ImportedVariant: ElmExpr;
+  /**
+   * リストリテラル
+   */
+  readonly List: (a: List<ElmExpr>) => ElmExpr;
+  /**
+   * ????
+   */
+  readonly Op: ElmExpr;
+  /**
+   * 単行マイナス
+   */
+  readonly Negate: (a: ElmExpr) => ElmExpr;
+  /**
+   * ????
+   */
+  readonly Binops: ElmExpr;
+  /**
+   * ラムダ式. 関数リテラル
+   */
+  readonly Lambda: ElmExpr;
+  /**
+   * 関数呼び出し
+   */
+  readonly Call: ElmExpr;
+  /**
+   * if式. else ifも含めている
+   */
+  readonly If: ElmExpr;
+  /**
+   * let式. ローカル関数定義
+   */
+  readonly Let: ElmExpr;
+  /**
+   * case式
+   */
+  readonly Case: ElmExpr;
+  /**
+   * アクセサ .name メンバーを取得する関数
+   */
+  readonly Accessor: (a: String) => ElmExpr;
+  /**
+   * user.name メンバー取得
+   */
+  readonly Access: ElmExpr;
+  /**
+   * { user | name = "新しい名前" }
+   */
+  readonly Update: ElmExpr;
+  /**
+   * レコード. { name = "名前", age = 20 }
+   */
+  readonly Record: ElmExpr;
+  /**
+   * Unit. ()
+   */
+  readonly Unit: ElmExpr;
+  /**
+   * 2つの要素のタプル. (1, "あ")
+   */
+  readonly Tuple2: ElmExpr;
+  /**
+   * 3つの要素のタプル. (1, "い", 3)
+   */
+  readonly Tuple3: ElmExpr;
+  readonly codec: Codec<ElmExpr>;
+} = {
+  StringLiteral: (string_: String): ElmExpr => ({
+    _: "StringLiteral",
+    string: string_,
+  }),
+  IntLiteral: (int32: Int32): ElmExpr => ({ _: "IntLiteral", int32 }),
+  LocalVariant: { _: "LocalVariant" },
+  ImportedVariant: { _: "ImportedVariant" },
+  List: (elmExprList: List<ElmExpr>): ElmExpr => ({ _: "List", elmExprList }),
+  Op: { _: "Op" },
+  Negate: (elmExpr: ElmExpr): ElmExpr => ({ _: "Negate", elmExpr }),
+  Binops: { _: "Binops" },
+  Lambda: { _: "Lambda" },
+  Call: { _: "Call" },
+  If: { _: "If" },
+  Let: { _: "Let" },
+  Case: { _: "Case" },
+  Accessor: (string_: String): ElmExpr => ({ _: "Accessor", string: string_ }),
+  Access: { _: "Access" },
+  Update: { _: "Update" },
+  Record: { _: "Record" },
+  Unit: { _: "Unit" },
+  Tuple2: { _: "Tuple2" },
+  Tuple3: { _: "Tuple3" },
+  codec: {
+    encode: (value: ElmExpr): ReadonlyArray<number> => {
+      switch (value._) {
+        case "StringLiteral": {
+          return [0].concat(String.codec.encode(value.string));
+        }
+        case "IntLiteral": {
+          return [1].concat(Int32.codec.encode(value.int32));
+        }
+        case "LocalVariant": {
+          return [2];
+        }
+        case "ImportedVariant": {
+          return [3];
+        }
+        case "List": {
+          return [4].concat(
+            List.codec(ElmExpr.codec).encode(value.elmExprList)
+          );
+        }
+        case "Op": {
+          return [5];
+        }
+        case "Negate": {
+          return [6].concat(ElmExpr.codec.encode(value.elmExpr));
+        }
+        case "Binops": {
+          return [7];
+        }
+        case "Lambda": {
+          return [8];
+        }
+        case "Call": {
+          return [9];
+        }
+        case "If": {
+          return [10];
+        }
+        case "Let": {
+          return [11];
+        }
+        case "Case": {
+          return [12];
+        }
+        case "Accessor": {
+          return [13].concat(String.codec.encode(value.string));
+        }
+        case "Access": {
+          return [14];
+        }
+        case "Update": {
+          return [15];
+        }
+        case "Record": {
+          return [16];
+        }
+        case "Unit": {
+          return [17];
+        }
+        case "Tuple2": {
+          return [18];
+        }
+        case "Tuple3": {
+          return [19];
+        }
+      }
+    },
+    decode: (
+      index: number,
+      binary: Uint8Array
+    ): { readonly result: ElmExpr; readonly nextIndex: number } => {
+      const patternIndex: {
+        readonly result: number;
+        readonly nextIndex: number;
+      } = Int32.codec.decode(index, binary);
+      if (patternIndex.result === 0) {
+        const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmExpr.StringLiteral(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 1) {
+        const result: {
+          readonly result: Int32;
+          readonly nextIndex: number;
+        } = Int32.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmExpr.IntLiteral(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 2) {
+        return {
+          result: ElmExpr.LocalVariant,
+          nextIndex: patternIndex.nextIndex,
+        };
+      }
+      if (patternIndex.result === 3) {
+        return {
+          result: ElmExpr.ImportedVariant,
+          nextIndex: patternIndex.nextIndex,
+        };
+      }
+      if (patternIndex.result === 4) {
+        const result: {
+          readonly result: List<ElmExpr>;
+          readonly nextIndex: number;
+        } = List.codec(ElmExpr.codec).decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmExpr.List(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 5) {
+        return { result: ElmExpr.Op, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 6) {
+        const result: {
+          readonly result: ElmExpr;
+          readonly nextIndex: number;
+        } = ElmExpr.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmExpr.Negate(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 7) {
+        return { result: ElmExpr.Binops, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 8) {
+        return { result: ElmExpr.Lambda, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 9) {
+        return { result: ElmExpr.Call, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 10) {
+        return { result: ElmExpr.If, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 11) {
+        return { result: ElmExpr.Let, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 12) {
+        return { result: ElmExpr.Case, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 13) {
+        const result: {
+          readonly result: String;
+          readonly nextIndex: number;
+        } = String.codec.decode(patternIndex.nextIndex, binary);
+        return {
+          result: ElmExpr.Accessor(result.result),
+          nextIndex: result.nextIndex,
+        };
+      }
+      if (patternIndex.result === 14) {
+        return { result: ElmExpr.Access, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 15) {
+        return { result: ElmExpr.Update, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 16) {
+        return { result: ElmExpr.Record, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 17) {
+        return { result: ElmExpr.Unit, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 18) {
+        return { result: ElmExpr.Tuple2, nextIndex: patternIndex.nextIndex };
+      }
+      if (patternIndex.result === 19) {
+        return { result: ElmExpr.Tuple3, nextIndex: patternIndex.nextIndex };
+      }
+      throw new Error("存在しないパターンを指定された 型を更新してください");
     },
   },
 };

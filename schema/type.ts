@@ -37,3 +37,7 @@ export const FunctionType = noParameterType(id.FunctionType);
 export const Tuple2 = noParameterType(id.Tuple2);
 
 export const Tuple3 = noParameterType(id.Tuple3);
+
+export const ElmDefinition = noParameterType(id.ElmDefinition);
+
+export const ElmExpr = noParameterType(id.ElmExpr);
