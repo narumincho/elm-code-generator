@@ -22,16 +22,16 @@ const indent = "    ";
 
 export const fieldNameFromString = (
   fieldName: string
-): data.Maybe<data.FieldName> => {
+): data.Maybe<data.ElmFieldName> => {
   if (/^[a-z][a-zA-Z0-9_]*/u.test(fieldName) && !reservedWord.has(fieldName)) {
-    return data.Maybe.Just(data.FieldName.FieldName(fieldName));
+    return data.Maybe.Just(data.ElmFieldName.FieldName(fieldName));
   }
   return data.Maybe.Nothing();
 };
 
 export const fieldNameFromStringOrThrow = (
   fieldName: string
-): data.FieldName => {
+): data.ElmFieldName => {
   const result = fieldNameFromString(fieldName);
   switch (result._) {
     case "Just":
@@ -43,12 +43,12 @@ export const fieldNameFromStringOrThrow = (
 
 export const variantNameFormString = (
   variantName: string
-): data.Maybe<data.VariantName> => {
+): data.Maybe<data.ElmVariantName> => {
   if (
     /^[A-Z][a-zA-Z0-9_]*/u.test(variantName) &&
     !reservedWord.has(variantName)
   ) {
-    return data.Maybe.Just(data.VariantName.VariantName(variantName));
+    return data.Maybe.Just(data.ElmVariantName.VariantName(variantName));
   }
   return data.Maybe.Nothing();
 };
@@ -58,7 +58,7 @@ export const variantNameFormString = (
  */
 export const variantNameFormStringOrThrow = (
   variantName: string
-): data.VariantName => {
+): data.ElmVariantName => {
   const result = variantNameFormString(variantName);
   switch (result._) {
     case "Just":
@@ -92,7 +92,7 @@ export const elmTypeNameFromStringOrThrow = (
   }
 };
 
-export const codeToString = (elmCode: data.Code): string => {
+export const codeToString = (elmCode: data.ElmCode): string => {
   checkDuplicateTypeDeclamationName(elmCode);
 
   return (
@@ -109,7 +109,7 @@ export const codeToString = (elmCode: data.Code): string => {
   );
 };
 
-const checkDuplicateTypeDeclamationName = (elmCode: data.Code): void => {
+const checkDuplicateTypeDeclamationName = (elmCode: data.ElmCode): void => {
   const nameSet = new Set<string>();
   for (const typeDeclaration of elmCode.typeDeclarationList) {
     const nameAsString = getTypeDeclarationName(typeDeclaration).string;
@@ -123,36 +123,36 @@ const checkDuplicateTypeDeclamationName = (elmCode: data.Code): void => {
 };
 
 const getTypeDeclarationName = (
-  typeDeclaration: data.TypeDeclaration
+  typeDeclaration: data.ElmTypeDeclaration
 ): data.ElmTypeName => {
   switch (typeDeclaration._) {
     case "CustomType":
-      return typeDeclaration.customType.name;
+      return typeDeclaration.elmCustomType.name;
     case "TypeAlias":
-      return typeDeclaration.typeAlias.name;
+      return typeDeclaration.elmTypeAlias.name;
   }
 };
 
 const typeDeclarationToExportName = (
-  typeDeclaration: data.TypeDeclaration
+  typeDeclaration: data.ElmTypeDeclaration
 ): string => {
   switch (typeDeclaration._) {
     case "CustomType":
-      return customTypeToExportName(typeDeclaration.customType);
+      return customTypeToExportName(typeDeclaration.elmCustomType);
     case "TypeAlias":
-      if (typeDeclaration.typeAlias.export) {
-        return typeDeclaration.typeAlias.name.string;
+      if (typeDeclaration.elmTypeAlias.export) {
+        return typeDeclaration.elmTypeAlias.name.string;
       }
       return "";
   }
 };
 
-const codeToImportSection = (code: data.Code): string =>
+const codeToImportSection = (code: data.ElmCode): string =>
   [...collectModuleName(code)]
     .map((moduleName): string => "import " + moduleName)
     .join("\n");
 
-const customTypeToExportName = (customType: data.CustomType): string => {
+const customTypeToExportName = (customType: data.ElmCustomType): string => {
   switch (customType.export) {
     case "NoExport":
       return "";
@@ -164,17 +164,17 @@ const customTypeToExportName = (customType: data.CustomType): string => {
 };
 
 const typeDeclarationToString = (
-  typeDeclaration: data.TypeDeclaration
+  typeDeclaration: data.ElmTypeDeclaration
 ): string => {
   switch (typeDeclaration._) {
     case "TypeAlias":
-      return typeAliasToString(typeDeclaration.typeAlias);
+      return typeAliasToString(typeDeclaration.elmTypeAlias);
     case "CustomType":
-      return customTypeToString(typeDeclaration.customType);
+      return customTypeToString(typeDeclaration.elmCustomType);
   }
 };
 
-const typeAliasToString = (typeAlias: data.TypeAlias): string =>
+const typeAliasToString = (typeAlias: data.ElmTypeAlias): string =>
   commentToString(typeAlias.comment) +
   "type alias " +
   typeAlias.name.string +
@@ -192,10 +192,10 @@ const commentToString = (comment: string): string => {
   return "{-| " + comment + "\n-}\n";
 };
 
-const fieldToString = (field: data.Field): string =>
+const fieldToString = (field: data.ElmField): string =>
   field.name.string + " : " + elmTypeToString(field.type);
 
-const customTypeToString = (customType: data.CustomType): string =>
+const customTypeToString = (customType: data.ElmCustomType): string =>
   commentToString(customType.comment) +
   "type " +
   customType.name.string +
@@ -207,7 +207,7 @@ const customTypeToString = (customType: data.CustomType): string =>
   "= " +
   customType.variantList.map(variantToString).join("\n" + indent + "| ");
 
-const variantToString = (variant: data.Variant): string =>
+const variantToString = (variant: data.ElmVariant): string =>
   variant.name.string +
   (variant.parameter.length === 0
     ? ""
@@ -216,31 +216,31 @@ const variantToString = (variant: data.Variant): string =>
 const elmTypeToString = (elmType: data.ElmType): string => {
   switch (elmType._) {
     case "LocalType":
-      if (elmType.localType.parameter.length === 0) {
-        return elmType.localType.typeName.string;
+      if (elmType.elmLocalType.parameter.length === 0) {
+        return elmType.elmLocalType.typeName.string;
       }
       return (
         "(" +
-        elmType.localType.typeName.string +
+        elmType.elmLocalType.typeName.string +
         " " +
-        elmType.localType.parameter.map(elmTypeToString).join(" ") +
+        elmType.elmLocalType.parameter.map(elmTypeToString).join(" ") +
         ")"
       );
     case "ImportedType":
-      if (elmType.importedType.parameter.length === 0) {
+      if (elmType.elmImportedType.parameter.length === 0) {
         return (
-          elmType.importedType.moduleName +
+          elmType.elmImportedType.moduleName +
           "." +
-          elmType.importedType.typeName.string
+          elmType.elmImportedType.typeName.string
         );
       }
       return (
         "(" +
-        elmType.importedType.moduleName +
+        elmType.elmImportedType.moduleName +
         "." +
-        elmType.importedType.typeName.string +
+        elmType.elmImportedType.typeName.string +
         " " +
-        elmType.importedType.parameter.map(elmTypeToString).join(" ") +
+        elmType.elmImportedType.parameter.map(elmTypeToString).join(" ") +
         ")"
       );
     case "TypeParameter":
@@ -248,9 +248,9 @@ const elmTypeToString = (elmType: data.ElmType): string => {
     case "Function":
       return (
         "(" +
-        elmTypeToString(elmType.functionType.input) +
+        elmTypeToString(elmType.elmFunctionType.input) +
         " -> " +
-        elmTypeToString(elmType.functionType.output) +
+        elmTypeToString(elmType.elmFunctionType.output) +
         ")"
       );
     case "List":
@@ -260,48 +260,50 @@ const elmTypeToString = (elmType: data.ElmType): string => {
     case "Tuple2":
       return (
         "(" +
-        elmTypeToString(elmType.tuple2.first) +
+        elmTypeToString(elmType.elmTuple2.first) +
         ", " +
-        elmTypeToString(elmType.tuple2.second) +
+        elmTypeToString(elmType.elmTuple2.second) +
         ")"
       );
     case "Tuple3":
       return (
         "(" +
-        elmTypeToString(elmType.tuple3.first) +
+        elmTypeToString(elmType.elmTuple3.first) +
         ", " +
-        elmTypeToString(elmType.tuple3.second) +
+        elmTypeToString(elmType.elmTuple3.second) +
         ", " +
-        elmTypeToString(elmType.tuple3.third) +
+        elmTypeToString(elmType.elmTuple3.third) +
         ")"
       );
     case "Record":
       return (
         "{ " +
-        elmType.fieldList.map((e): string => fieldToString(e)).join(", ") +
+        elmType.elmFieldList.map((e): string => fieldToString(e)).join(", ") +
         " }"
       );
   }
 };
 
-const collectModuleName = (code: data.Code): ReadonlySet<string> =>
+const collectModuleName = (code: data.ElmCode): ReadonlySet<string> =>
   new Set(
     code.typeDeclarationList.flatMap(
       (typeDeclaration): ReadonlyArray<string> => {
         switch (typeDeclaration._) {
           case "CustomType":
             return [
-              ...collectModuleNameInCustomType(typeDeclaration.customType),
+              ...collectModuleNameInCustomType(typeDeclaration.elmCustomType),
             ];
           case "TypeAlias":
-            return [...collectModuleNameInType(typeDeclaration.typeAlias.type)];
+            return [
+              ...collectModuleNameInType(typeDeclaration.elmTypeAlias.type),
+            ];
         }
       }
     )
   );
 
 const collectModuleNameInCustomType = (
-  customType: data.CustomType
+  customType: data.ElmCustomType
 ): ReadonlySet<string> =>
   new Set(
     customType.variantList.flatMap((variant) =>
@@ -317,18 +319,18 @@ const collectModuleNameInType = (
   switch (elmType._) {
     case "Function":
       return new Set([
-        ...collectModuleNameInType(elmType.functionType.input),
-        ...collectModuleNameInType(elmType.functionType.output),
+        ...collectModuleNameInType(elmType.elmFunctionType.input),
+        ...collectModuleNameInType(elmType.elmFunctionType.output),
       ]);
     case "ImportedType":
-      return new Set([elmType.importedType.moduleName]);
+      return new Set([elmType.elmImportedType.moduleName]);
     case "TypeParameter":
       return new Set();
     case "LocalType":
       return new Set();
     case "Record":
       return new Set(
-        elmType.fieldList.flatMap((field) => [
+        elmType.elmFieldList.flatMap((field) => [
           ...collectModuleNameInType(field.type),
         ])
       );
@@ -338,14 +340,14 @@ const collectModuleNameInType = (
       return new Set();
     case "Tuple2":
       return new Set([
-        ...collectModuleNameInType(elmType.tuple2.first),
-        ...collectModuleNameInType(elmType.tuple2.second),
+        ...collectModuleNameInType(elmType.elmTuple2.first),
+        ...collectModuleNameInType(elmType.elmTuple2.second),
       ]);
     case "Tuple3":
       return new Set([
-        ...collectModuleNameInType(elmType.tuple3.first),
-        ...collectModuleNameInType(elmType.tuple3.second),
-        ...collectModuleNameInType(elmType.tuple3.third),
+        ...collectModuleNameInType(elmType.elmTuple3.first),
+        ...collectModuleNameInType(elmType.elmTuple3.second),
+        ...collectModuleNameInType(elmType.elmTuple3.third),
       ]);
   }
 };

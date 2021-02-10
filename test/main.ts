@@ -19,12 +19,12 @@ describe("test", () => {
     const colorTypeName = main.elmTypeNameFromString("Color");
     switch (colorTypeName._) {
       case "Just": {
-        const sampleElmCode: data.Code = {
+        const sampleElmCode: data.ElmCode = {
           moduleName: "Main",
           typeDeclarationList: [
-            data.TypeDeclaration.CustomType({
+            data.ElmTypeDeclaration.CustomType({
               name: colorTypeName.value,
-              export: data.CustomTypeExportLevel.ExportTypeAndVariant,
+              export: data.ElmCustomTypeExportLevel.ExportTypeAndVariant,
               comment: "色",
               parameter: [],
               variantList: [
@@ -53,10 +53,10 @@ describe("test", () => {
   });
 
   it("output type alias", () => {
-    const sampleElmCode: data.Code = {
+    const sampleElmCode: data.ElmCode = {
       moduleName: "Main",
       typeDeclarationList: [
-        data.TypeDeclaration.TypeAlias({
+        data.ElmTypeDeclaration.TypeAlias({
           name: main.elmTypeNameFromStringOrThrow("User"),
           export: false,
           comment: "色",
@@ -79,10 +79,10 @@ describe("test", () => {
 
   it("invalid filed name", () => {
     expect(() => {
-      const sampleElmCode: data.Code = {
+      const sampleElmCode: data.ElmCode = {
         moduleName: "Main",
         typeDeclarationList: [
-          data.TypeDeclaration.TypeAlias({
+          data.ElmTypeDeclaration.TypeAlias({
             name: main.elmTypeNameFromStringOrThrow("IncludeInvalidFiledName"),
             export: false,
             comment: "",
@@ -102,10 +102,10 @@ describe("test", () => {
   });
 
   it("output (List Int) -> String", () => {
-    const sampleElmCode: data.Code = {
+    const sampleElmCode: data.ElmCode = {
       moduleName: "Main",
       typeDeclarationList: [
-        data.TypeDeclaration.TypeAlias({
+        data.ElmTypeDeclaration.TypeAlias({
           name: main.elmTypeNameFromStringOrThrow("IntListToString"),
           export: false,
           comment: "List Int -> Stringの型",
@@ -121,10 +121,10 @@ describe("test", () => {
   });
 
   it("output type parameter", () => {
-    const sampleCode: data.Code = {
+    const sampleCode: data.ElmCode = {
       moduleName: "Main",
       typeDeclarationList: [
-        data.TypeDeclaration.TypeAlias({
+        data.ElmTypeDeclaration.TypeAlias({
           name: main.elmTypeNameFromStringOrThrow("WithParameter"),
           export: false,
           comment: "型パラメーターがつくもの",
