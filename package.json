@@ -1,6 +1,6 @@
 {
   "name": "elm-code-generator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "elm-code-generator",
   "main": "source/main.js",
   "scripts": {
