@@ -4,8 +4,7 @@
   "description": "elm-code-generator",
   "main": "source/main.js",
   "scripts": {
-    "test": "jest --watch --verbose false",
-    "generateCode": "node ./schema/start.js"
+    "test": "jest --watch --verbose false"
   },
   "author": "narumincho <narumincho.starfy@gmail.com> (https://narumincho.com)",
   "license": "ISC",
@@ -14,7 +13,6 @@
     "@types/prettier": "2.2.0",
     "@typescript-eslint/eslint-plugin": "4.15.0",
     "@typescript-eslint/parser": "4.15.0",
-    "definy-core": "0.2.6",
     "eslint": "7.19.0",
     "eslint-config-prettier": "7.2.0",
     "eslint-plugin-prettier": "3.3.1",
